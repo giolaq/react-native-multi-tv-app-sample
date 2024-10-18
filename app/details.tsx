@@ -4,6 +4,7 @@ import { SpatialNavigationFocusableView, SpatialNavigationRoot } from 'react-tv-
 import { scaledPixels } from '@/hooks/useScale';
 import { useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
+import { StarRating } from '@/components/StarRating';
 
 export default function DetailsScreen() {
   const { title, description, headerImage } = useLocalSearchParams();
@@ -20,6 +21,10 @@ export default function DetailsScreen() {
         <View style={styles.contentContainer}>
           <View style={styles.topContent}>
             <Text style={styles.title}>{title}</Text>
+            <View style={styles.ratingContainer}>
+              <StarRating rating={4.5} />
+              <Text style={styles.ratingText}>4.5/5</Text>
+            </View>
             <Text style={styles.description}>
               {description}
             </Text>
@@ -135,6 +140,20 @@ const useDetailsStyles = function() {
       color: '#000',
       fontSize: scaledPixels(18),
       fontWeight: 'bold',
-    }
+    },
+    ratingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: scaledPixels(10),
+      marginBottom: scaledPixels(20),
+    },
+    ratingText: {
+      color: '#ffffff',
+      fontSize: scaledPixels(18),
+      marginLeft: scaledPixels(10),
+      textShadowColor: 'rgba(0, 0, 0, 0.75)',
+      textShadowOffset: { width: -1, height: 1 },
+      textShadowRadius: 10,
+    },
   });
 };
