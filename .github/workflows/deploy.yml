@@ -20,7 +20,7 @@ jobs:
           EXPO_TV: 1
         run: |
           npm install --legacy-peer-deps 
-          expo prebuild --clean
+          npx expo prebuild --clean
           npm run predeploy
     
       - name: Deploy 🚀
