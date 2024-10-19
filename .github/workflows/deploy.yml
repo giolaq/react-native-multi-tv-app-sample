@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - tmdbapi
-  workflow_dispatch:
+  workflow_dispatch
 permissions:
   contents: write
 jobs:
@@ -17,7 +17,10 @@ jobs:
       - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        run: npm run predeploy
+        run: |
+          npm install --legacy-peer-deps 
+          EXPO_TV=1 expo prebuild --clean
+          npm run predeploy
     
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
