@@ -1,6 +1,7 @@
 {
   "name": "react-native-multi-tv-app-sample",
   "main": "expo-router/entry",
+  "homepage": "https://github.com/giolaq/react-native-multi-tv-app-sample",
   "version": "1.0.0",
   "scripts": {
     "start": "EXPO_TV=1 expo start",
@@ -9,7 +10,9 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "prebuild": "EXPO_TV=1 expo prebuild --clean"
+    "prebuild": "EXPO_TV=1 expo prebuild --clean",
+    "predeploy": "expo export -p web",
+    "deploy": "gh-pages -d dist"
   },
   "jest": {
     "preset": "jest-expo"
