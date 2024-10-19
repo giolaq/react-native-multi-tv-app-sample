@@ -1,5 +1,4 @@
-const API_KEY = 'YOUR_TMDB_API_KEY'; // Remember this is not a secure way to use api keys in production!
-
+const API_KEY = process.env.TMDB_API_KEY || 'YOUR_FALLBACK_API_KEY'; // Remember this is not a secure way to use api keys in production!
 const BASE_URL = 'https://api.themoviedb.org/3';
 
 export interface Movie {
