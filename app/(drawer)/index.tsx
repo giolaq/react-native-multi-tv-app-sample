@@ -1,40 +1,35 @@
 import { StyleSheet, FlatList, View, Image, Text } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DrawerActions, useIsFocused } from '@react-navigation/native';
 import { useMenuContext } from '../../components/MenuContext';
 import { SpatialNavigationFocusableView, SpatialNavigationRoot, SpatialNavigationScrollView, SpatialNavigationView, SpatialNavigationNode, SpatialNavigationVirtualizedList, SpatialNavigationVirtualizedListRef, DefaultFocus } from 'react-tv-space-navigation';
 import { Direction } from '@bam.tech/lrud';
 import { scaledPixels } from '@/hooks/useScale';
 import { LinearGradient } from 'expo-linear-gradient';
-
-
-interface CardData {
-  id: string;
-  title: string;
-  description: string;
-  headerImage: string;
-}
+import { Movie, fetchTrendingMovies, getImageUrl } from '../api/tmdb';
 
 export default function IndexScreen() {
   const styles = useGridStyles();
   const router = useRouter();
   const navigation = useNavigation();
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
-  const trendingRef = useRef<SpatialNavigationVirtualizedListRef>(null);
-  const classicsRef = useRef<SpatialNavigationVirtualizedListRef>(null);
-  const hipAndModernRef = useRef<SpatialNavigationVirtualizedListRef>(null);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const isFocused = useIsFocused();
   const isActive = isFocused && !isMenuOpen;
 
-  const focusedItem = useMemo(() => moviesData[focusedIndex], [focusedIndex]);
+  const focusedItem = useMemo(() => movies[focusedIndex], [focusedIndex, movies]);
+
+  useEffect(() => {
+    fetchTrendingMovies().then(setMovies);
+  }, []);
 
   const renderHeader = useCallback(() => (
     <View style={styles.header}>
       <Image 
         style={styles.headerImage}
-        source={focusedItem.headerImage}
+        source={{ uri: getImageUrl(focusedItem?.backdrop_path || '', 'original') }}
         resizeMode="cover"
       />
       <LinearGradient
@@ -44,8 +39,8 @@ export default function IndexScreen() {
         style={styles.gradient}
       />
       <View style={styles.headerTextContainer}>
-        <Text style={styles.headerTitle}>{focusedItem.title}</Text>
-        <Text style={styles.headerDescription}>{focusedItem.description}</Text>
+        <Text style={styles.headerTitle}>{focusedItem?.title}</Text>
+        <Text style={styles.headerDescription}>{focusedItem?.overview}</Text>
       </View>
     </View>
   ), [focusedItem, styles]);
@@ -61,16 +56,16 @@ export default function IndexScreen() {
     [toggleMenu, focusedIndex, navigation],
   );
 
-  const renderScrollableRow = useCallback((title: string, ref: React.RefObject<FlatList>) => {
-    const renderItem = useCallback(({ item, index }: { item: CardData; index: number }) => (
+  const renderScrollableRow = useCallback((title: string) => {
+    const renderItem = useCallback(({ item, index }: { item: Movie; index: number }) => (
       <SpatialNavigationFocusableView
         onSelect={() => { 
           router.push({
             pathname: '/details',
             params: { 
               title: item.title,
-              description: item.description,
-              headerImage: item.headerImage
+              description: item.overview,
+              headerImage: getImageUrl(item.backdrop_path, 'original')
             }         
            });
         }}
@@ -78,7 +73,7 @@ export default function IndexScreen() {
       >
         {({ isFocused }) => (
           <View style={[styles.highlightThumbnail, isFocused && styles.highlightThumbnailFocused]}>
-            <Image source={item.headerImage} style={styles.headerImage} />
+            <Image source={{ uri: getImageUrl(item.backdrop_path) }} style={styles.headerImage} />
             <View style={styles.thumbnailTextContainer}>
              <Text style={styles.thumbnailText}>{item.title}</Text>   
             </View>
@@ -93,7 +88,7 @@ export default function IndexScreen() {
           <SpatialNavigationNode>
           <DefaultFocus>
             <SpatialNavigationVirtualizedList 
-              data={moviesData} 
+              data={movies} 
               orientation="horizontal" 
               renderItem={renderItem}
               itemSize={scaledPixels(425)}
@@ -105,7 +100,7 @@ export default function IndexScreen() {
           </SpatialNavigationNode>
       </View>
     );
-  }, [styles]);
+  }, [movies, styles]);
 
   return (
     <SpatialNavigationRoot
@@ -116,15 +111,12 @@ export default function IndexScreen() {
         <SpatialNavigationScrollView  
           offsetFromStart={scaledPixels(60)}  
           style={styles.scrollContent}>   
-          {renderScrollableRow("Trending Movies", trendingRef)}
-          {renderScrollableRow("Classics", classicsRef)}
-          {renderScrollableRow("Hip and Modern", hipAndModernRef)}
+          {renderScrollableRow("Trending Movies")}
         </SpatialNavigationScrollView>
         </View>
     </SpatialNavigationRoot> 
   );
 }
-
 
 const useGridStyles = function () {
   return StyleSheet.create({
@@ -136,6 +128,45 @@ const useGridStyles = function () {
       flex: 1,
       marginTop: scaledPixels(10),
       marginBottom: scaledPixels(48)
+    },
+
+    movieCard: {
+      marginRight: scaledPixels(10),
+      borderRadius: scaledPixels(5),
+      overflow: 'hidden',
+    },
+    movieCardFocused: {
+      borderColor: '#fff',
+      borderWidth: scaledPixels(4),
+    },
+    movieCardImage: {
+      width: '100%',
+      height: '100%',
+    },
+    movieCardTextContainer: {
+      position: 'absolute',
+      bottom: scaledPixels(10),
+      left: scaledPixels(10),
+      right: scaledPixels(10),
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      padding: scaledPixels(5),
+      borderRadius: scaledPixels(3),
+    },
+    movieCardText: {
+      color: '#fff',
+      fontSize: scaledPixels(18),
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    rowContainer: {
+      marginBottom: scaledPixels(30),
+    },
+    rowTitle: {
+      color: '#fff',
+      fontSize: scaledPixels(24),
+      fontWeight: 'bold',
+      marginBottom: scaledPixels(10),
+      marginLeft: scaledPixels(10),
     },
     highlightsTitle: {
       color: '#fff',
@@ -235,106 +266,3 @@ const useGridStyles = function () {
     },
   });
 };
-
-const moviesData = [
-  {
-    "id": 0,
-    "title": "Wagon Train Warriors",    
-    "description": "Pioneers face hardships and hostile forces on their journey westward.",
-    "headerImage": require("@assets/images/movie.png"),
-    "duration": 100    
-  },
-  {
-    "id": 6,
-    "title": "Frontier Hearts",
-    "description": "Two families bond and clash while traveling together to settle new lands.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 130
-  },
-  {
-    "id": 1,
-    "title": "The Journey West",
-    "description": "A family's perilous journey along the Oregon Trail to find a new home.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 110
-  },
-  {
-    "id": 4,
-    "title": "Trailblazers",
-    "description": "Adventurous pioneers carve out new paths and face unknown perils in the wilderness.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 115
-  },
-  {
-    "id": 2,
-    "title": "Homestead Dreams",
-    "description": "Settlers struggle to build a new life on the frontier amidst challenges and dangers.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 120
-  },
-  {
-    "id": 3,
-    "title": "Westward Bound",
-    "description": "A group of pioneers battles the elements and each other on their trek west.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 95
-  },
-
-  {
-    "id": 5,
-    "title": "Prairie Odyssey",
-    "description": "A young couple's journey to the west tests their love and determination.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 105
-  },
-  {
-    "id": 7,
-    "title": "Pioneer Spirit",
-    "description": "A resilient widow leads a group of settlers to the promised land of the West.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 90
-  },
-  {
-    "id": 9,
-    "title": "The Great Migration",
-    "description": "Hundreds of families embark on a mass migration to California during the Gold Rush.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 140
-  },
-  {
-    "id": 10,
-    "title": "Untamed Horizon",
-    "description": "Pioneers face unpredictable challenges as they seek a new beginning in the West.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 100
-  },
-  {
-    "id": 11,
-    "title": "Endless Prairie",
-    "description": "A group of settlers confronts endless prairies and relentless weather on their journey.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 115
-  },
-  {
-    "id": 12,
-    "title": "Crossing the Divide",
-    "description": "Families face immense trials as they cross the Continental Divide.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 120
-  },
-  {
-    "id": 13,
-    "title": "Frontier Faith",
-    "description": "A preacher and his flock encounter trials of faith on their way to the West.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 100
-  },
-  {
-    "id": 14,
-    "title": "Pioneer's Path",
-    "description": "A young pioneer girl narrates her family's adventures and struggles on the frontier.",
-    "headerImage": require("@/assets/images/movie.png"),
-    "duration": 85
-  }
-]
-
