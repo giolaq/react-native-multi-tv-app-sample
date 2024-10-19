@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - tmdbapi
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
