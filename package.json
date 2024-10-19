@@ -1,7 +1,6 @@
 {
   "name": "react-native-multi-tv-app-sample",
   "main": "expo-router/entry",
-  "homepage": "https://github.com/giolaq/react-native-multi-tv-app-sample",
   "version": "1.0.0",
   "scripts": {
     "start": "EXPO_TV=1 expo start",
