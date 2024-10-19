@@ -12,7 +12,7 @@
     "lint": "expo lint",
     "prebuild": "EXPO_TV=1 expo prebuild --clean",
     "predeploy": "expo export -p web",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -t -d dist"
   },
   "jest": {
     "preset": "jest-expo"

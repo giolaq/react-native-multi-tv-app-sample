@@ -31,7 +31,8 @@
       "expo-router"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/react-native-multi-tv-app-sample"
     },
     "name": "MultiTVSample",
     "slug": "MultiTVSample",
