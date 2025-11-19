@@ -23,6 +23,8 @@
     "build:all": "yarn workspaces foreach -pt run build",
     "build:vega": "yarn workspace @multi-tv/vega run build",
     "build:vega:debug": "yarn workspace @multi-tv/vega run build:debug",
+    "build:web": "yarn workspace @multi-tv/expo-multi-tv run export:web",
+    "build:webos": "yarn workspace @multi-tv/expo-multi-tv run export:webos",
     "test:all": "yarn workspaces foreach -pt run test",
     "lint:all": "yarn workspaces foreach -pt run lint",
     "typecheck": "yarn workspaces foreach -pt run typecheck",

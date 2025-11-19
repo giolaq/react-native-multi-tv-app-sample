@@ -1,0 +1,15 @@
+{
+  "id": "com.multitv.expoapp",
+  "version": "1.0.0",
+  "vendor": "Multi-TV",
+  "type": "web",
+  "main": "index.html",
+  "title": "Multi-TV App",
+  "icon": "icon-80.png",
+  "largeIcon": "icon-130.png",
+  "bgImage": "splash.png",
+  "appDescription": "Multi-platform TV application built with React Native",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "handlesRelaunch": true
+}

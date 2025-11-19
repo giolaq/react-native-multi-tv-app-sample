@@ -239,6 +239,57 @@ npx expo export --platform web
 npx serve dist
 ```
 
+##### LG webOS Build
+
+To create a webOS package (IPK) for LG TVs:
+
+```bash
+# From root directory
+yarn build:webos
+
+# Or from the app directory
+cd apps/expo-multi-tv
+yarn export:webos
+```
+
+This will:
+1. Export the web build to the `dist` directory
+2. Create a `webos-build` directory with the required `appinfo.json`
+3. Optionally create an IPK package if `@webos-tools/cli` is installed
+
+**Prerequisites for IPK packaging:**
+
+```bash
+npm install -g @webos-tools/cli
+```
+
+**Manual IPK creation (if needed):**
+
+```bash
+# Create IPK manually with --no-minify flag (Expo output is already minified)
+ares-package apps/expo-multi-tv/webos-build --no-minify
+```
+
+**To install on your LG TV:**
+
+```bash
+# Setup your TV device
+ares-setup-device --add myTV <TV-IP-ADDRESS>
+
+# Install the app
+ares-install --device myTV apps/expo-multi-tv/com.multitv.expoapp_*.ipk
+
+# Launch the app
+ares-launch --device myTV com.multitv.expoapp
+```
+
+**Note:** Placeholder icons are provided in `apps/expo-multi-tv/assets/images/`:
+- `icon-80.png` (80x80 icon)
+- `icon-130.png` (130x130 large icon)
+- `splash-1920x1080.png` (1920x1080 loading screen)
+
+You can replace these with your own branded assets.
+
 #### Fire TV (Vega)
 
 For the Fire TV optimized build:
@@ -272,6 +323,8 @@ yarn build
 | `yarn dev:ios`     | Run on Apple TV                   |
 | `yarn dev:web`     | Run on Web                        |
 | `yarn dev:vega`    | Start vega Metro bundler          |
+| `yarn build:web`   | Build web production bundle       |
+| `yarn build:webos` | Build webOS package (IPK)         |
 | `yarn build:vega`  | Build vega for Fire TV            |
 | `yarn format`      | Format code with Prettier         |
 | `yarn clean:all`   | Clean all node_modules            |
@@ -283,12 +336,14 @@ Navigate to the app directory first:
 ```bash
 # expo-multi-tv
 cd apps/expo-multi-tv
-yarn start      # Start Metro bundler
-yarn android    # Run on Android TV
-yarn ios        # Run on Apple TV
-yarn web        # Run on Web
-yarn test       # Run tests
-yarn lint       # Lint code
+yarn start        # Start Metro bundler
+yarn android      # Run on Android TV
+yarn ios          # Run on Apple TV
+yarn web          # Run on Web
+yarn export:web   # Export web production build
+yarn export:webos # Export webOS package (IPK)
+yarn test         # Run tests
+yarn lint         # Lint code
 
 # vega
 cd apps/vega
