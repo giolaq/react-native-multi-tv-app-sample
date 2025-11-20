@@ -345,10 +345,18 @@ tizen install -n MultiTVExpoApp.wgt -t <tv-name>
 tizen run -p MultiTVExpoApp -t <tv-name>
 ```
 
-**Note:** A placeholder icon is expected at `apps/expo-multi-tv/assets/images/`:
+**Note:** A placeholder icon is provided at `apps/expo-multi-tv/assets/images/`:
 - `icon-512.png` (512x512 icon for Tizen)
 
 You can replace this with your own branded asset.
+
+**Testing with Tizen Simulator:**
+
+See [apps/expo-multi-tv/TIZEN_TESTING.md](apps/expo-multi-tv/TIZEN_TESTING.md) for detailed instructions on testing your app with the Tizen TV Simulator, including:
+- Setting up the Tizen Studio and emulator
+- Installing and running your WGT package
+- Remote debugging with Chrome DevTools
+- Troubleshooting common issues
 
 #### Fire TV (Vega)
 
