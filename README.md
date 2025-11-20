@@ -216,7 +216,7 @@ cd apps/expo-multi-tv
 yarn ios
 ```
 
-#### Web - Useful for LG WebOS and Tizen
+#### Web - Useful for LG webOS and Samsung Tizen
 
 Development server:
 
@@ -290,6 +290,66 @@ ares-launch --device myTV com.multitv.expoapp
 
 You can replace these with your own branded assets.
 
+##### Samsung Tizen Build
+
+To create a Tizen package (WGT) for Samsung TVs:
+
+```bash
+# From root directory
+yarn build:tizen
+
+# Or from the app directory
+cd apps/expo-multi-tv
+yarn export:tizen
+```
+
+This will:
+1. Export the web build to the `dist` directory
+2. Create a `tizen-build` directory with the required `config.xml`
+3. Optionally create a WGT package if Tizen CLI is installed
+
+**Prerequisites for WGT packaging:**
+
+1. Install Tizen Studio from [https://developer.tizen.org/development/tizen-studio/download](https://developer.tizen.org/development/tizen-studio/download)
+2. Add Tizen CLI to your PATH
+
+**Create certificate and security profile:**
+
+```bash
+# Create certificate
+tizen certificate -a MyProfile -p <password>
+
+# Create security profile
+tizen security-profiles add -n MyProfile -a /path/to/author.p12 -p <password>
+```
+
+**Manual WGT creation (if needed):**
+
+```bash
+# Package the app
+tizen package -t wgt -s MultiTVExpoApp -- apps/expo-multi-tv/tizen-build
+```
+
+**To install on your Samsung TV:**
+
+```bash
+# Enable developer mode on your TV first (Apps > Settings > Developer Mode)
+
+# Connect to TV
+tizen connect <TV-IP-ADDRESS>
+
+# Install the app
+tizen install -n MultiTVExpoApp.wgt -t <tv-name>
+
+# Run the app
+tizen run -p MultiTVExpoApp -t <tv-name>
+```
+
+**Note:** A placeholder icon is expected at `apps/expo-multi-tv/assets/images/`:
+- `icon-512.png` (512x512 icon for Tizen)
+
+You can replace this with your own branded asset.
+
 #### Fire TV (Vega)
 
 For the Fire TV optimized build:
@@ -325,6 +385,7 @@ yarn build
 | `yarn dev:vega`    | Start vega Metro bundler          |
 | `yarn build:web`   | Build web production bundle       |
 | `yarn build:webos` | Build webOS package (IPK)         |
+| `yarn build:tizen` | Build Tizen package (WGT)         |
 | `yarn build:vega`  | Build vega for Fire TV            |
 | `yarn format`      | Format code with Prettier         |
 | `yarn clean:all`   | Clean all node_modules            |
@@ -342,6 +403,7 @@ yarn ios          # Run on Apple TV
 yarn web          # Run on Web
 yarn export:web   # Export web production build
 yarn export:webos # Export webOS package (IPK)
+yarn export:tizen # Export Tizen package (WGT)
 yarn test         # Run tests
 yarn lint         # Lint code
 

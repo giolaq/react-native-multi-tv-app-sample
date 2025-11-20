@@ -25,6 +25,7 @@
     "build:vega:debug": "yarn workspace @multi-tv/vega run build:debug",
     "build:web": "yarn workspace @multi-tv/expo-multi-tv run export:web",
     "build:webos": "yarn workspace @multi-tv/expo-multi-tv run export:webos",
+    "build:tizen": "yarn workspace @multi-tv/expo-multi-tv run export:tizen",
     "test:all": "yarn workspaces foreach -pt run test",
     "lint:all": "yarn workspaces foreach -pt run lint",
     "typecheck": "yarn workspaces foreach -pt run typecheck",

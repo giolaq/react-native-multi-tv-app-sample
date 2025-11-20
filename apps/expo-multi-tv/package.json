@@ -11,6 +11,7 @@
     "dev:web": "expo start --web --port 8082",
     "export:web": "expo export --platform web",
     "export:webos": "npm run export:web && node scripts/export-webos.js",
+    "export:tizen": "npm run export:web && node scripts/export-tizen.js",
     "test": "jest --watchAll",
     "lint": "expo lint",
     "prebuild": "EXPO_TV=1 expo prebuild --clean",
