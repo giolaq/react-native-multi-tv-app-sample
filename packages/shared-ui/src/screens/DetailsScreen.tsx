@@ -67,8 +67,6 @@ export default function DetailsScreen() {
         <Image source={imageSource} style={detailsStyles.backgroundImage} />
         <View style={detailsStyles.contentContainer}>
           <View style={detailsStyles.topContent}>
-            <Text style={detailsStyles.title}>{title}</Text>
-
             {/* Metadata row */}
             <View style={detailsStyles.metadataRow}>
               {releaseYear && (
