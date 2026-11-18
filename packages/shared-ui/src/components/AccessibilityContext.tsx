@@ -73,11 +73,13 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
     };
     const subscriptions = [
       watchSystemSetting(AccessibilityInfo.isReduceMotionEnabled, 'reduceMotionChanged', update('reduceMotion')),
-      watchSystemSetting(
-        AccessibilityInfo.isHighTextContrastEnabled,
-        'highTextContrastChanged',
-        update('highContrast'),
-      ),
+      ...(AccessibilityInfo.isHighTextContrastEnabled
+        ? [watchSystemSetting(
+            AccessibilityInfo.isHighTextContrastEnabled,
+            'highTextContrastChanged',
+            update('highContrast'),
+          )]
+        : []),
     ];
     // Larger text has no system query on purpose: React Native already scales <Text> by the
     // device font size where the platform has one, so reading it here would apply it twice.
