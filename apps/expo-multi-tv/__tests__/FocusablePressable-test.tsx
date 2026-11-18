@@ -15,7 +15,7 @@ jest.mock('react-tv-space-navigation', () => ({
     children({ isFocused: mockFocused }),
 }));
 
-const render = async (overrides: Partial<AccessibilityPreferences>, style?: ViewStyle) => {
+const render = async (overrides: Partial<AccessibilityPreferences>, style?: ViewStyle | undefined) => {
   let renderer: TestRenderer.ReactTestRenderer | undefined;
   await act(async () => {
     renderer = TestRenderer.create(
