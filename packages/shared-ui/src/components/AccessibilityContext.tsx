@@ -53,6 +53,7 @@ const watchSystemSetting = (
   }
   query.call(AccessibilityInfo).then(onChange, () => {});
   try {
+    // @ts-ignore: highTextContrastChanged event exists on some TV platforms but not in standard React Native types
     return AccessibilityInfo.addEventListener(eventName, onChange) as Subscription;
   } catch {
     return undefined;
