@@ -33,6 +33,11 @@ const AccessibilityContext = createContext<AccessibilityContextType>({
 
 type Subscription = { remove: () => void } | undefined;
 
+// Type guard for AccessibilityInfo with optional high contrast API
+interface AccessibilityInfoWithHighContrast {
+  isHighTextContrastEnabled?: () => Promise<boolean>;
+}
+
 // Each platform reports a different subset: Android TV, Fire OS and Vega OS report reduce motion
 // and high text contrast, tvOS reports reduce motion, the web reads prefers-reduced-motion. Vega OS
 // sends no reduceMotionChanged event, so there reduce motion is read once, at launch.
@@ -71,11 +76,12 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
         setSystemPreferences((current) => (current[key] === enabled ? current : { ...current, [key]: enabled }));
       }
     };
+    const accessibilityInfoWithHighContrast = AccessibilityInfo as AccessibilityInfoWithHighContrast;
     const subscriptions = [
       watchSystemSetting(AccessibilityInfo.isReduceMotionEnabled, 'reduceMotionChanged', update('reduceMotion')),
-      ...(AccessibilityInfo.isHighTextContrastEnabled
+      ...(accessibilityInfoWithHighContrast.isHighTextContrastEnabled
         ? [watchSystemSetting(
-            AccessibilityInfo.isHighTextContrastEnabled,
+            accessibilityInfoWithHighContrast.isHighTextContrastEnabled,
             'highTextContrastChanged',
             update('highContrast'),
           )]
