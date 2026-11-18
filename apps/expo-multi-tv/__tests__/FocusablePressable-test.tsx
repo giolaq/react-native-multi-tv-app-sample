@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import FocusablePressable from '../../../packages/shared-ui/src/components/FocusablePressable';
 import { AccessibilityProvider } from '../../../packages/shared-ui/src/components/AccessibilityContext';
@@ -15,12 +15,12 @@ jest.mock('react-tv-space-navigation', () => ({
     children({ isFocused: mockFocused }),
 }));
 
-const render = async (overrides: Partial<AccessibilityPreferences>, style?: ViewStyle | undefined) => {
+const render = async (overrides: Partial<AccessibilityPreferences>, style?: StyleProp<ViewStyle>) => {
   let renderer: TestRenderer.ReactTestRenderer | undefined;
   await act(async () => {
     renderer = TestRenderer.create(
       <AccessibilityProvider initialOverrides={overrides}>
-        <FocusablePressable testID="button" text="Watch now" onSelect={() => {}} style={style} />
+        <FocusablePressable testID="button" text="Watch now" onSelect={() => {}} style={style as any} />
       </AccessibilityProvider>,
     );
   });
