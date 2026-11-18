@@ -1,34 +1,45 @@
-import { useMemo } from 'react';
-import { scaledPixels, safeZones, useTheme, Theme } from '@multi-tv/shared-ui';
-import { DrawerContentScrollView } from '@amazon-devices/react-navigation__drawer';
-import { View, StyleSheet, Image, Platform, Text } from 'react-native';
-import { DefaultFocus, SpatialNavigationFocusableView, SpatialNavigationRoot } from 'react-tv-space-navigation';
-import { useCallback } from 'react';
-import type { Direction } from '@bam.tech/lrud';
-import type { DrawerContentComponentProps } from '@amazon-devices/react-navigation__drawer';
-import { useMenuContext } from '@multi-tv/shared-ui';
+import {useMemo} from 'react';
+import {scaledPixels, safeZones, useTheme, Theme} from '@multi-tv/shared-ui';
+import {DrawerContentScrollView} from '@amazon-devices/react-navigation__drawer';
+import {View, StyleSheet, Image, Platform, Text} from 'react-native';
+import {
+  DefaultFocus,
+  SpatialNavigationFocusableView,
+  SpatialNavigationRoot,
+} from 'react-tv-space-navigation';
+import {useCallback} from 'react';
+import type {Direction} from '@bam.tech/lrud';
+import type {DrawerContentComponentProps} from '@amazon-devices/react-navigation__drawer';
+import {useMenuContext} from '@multi-tv/shared-ui';
 
-export default function VegaCustomDrawerContent(props: DrawerContentComponentProps) {
+export default function VegaCustomDrawerContent(
+  props: DrawerContentComponentProps,
+) {
   const navigation = props.navigation;
-  const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
+  const {isOpen: isMenuOpen, toggleMenu} = useMenuContext();
   const theme = useTheme();
   const styles = useMemo(() => createDrawerStyles(theme), [theme]);
 
-  const onDirectionHandledWithoutMovement = useCallback((direction: Direction) => {
-    if (direction === 'right') {
-      navigation.closeDrawer();
-      toggleMenu(false);
-    }
-  }, [navigation, toggleMenu]);
+  const onDirectionHandledWithoutMovement = useCallback(
+    (direction: Direction) => {
+      if (direction === 'right') {
+        navigation.closeDrawer();
+        toggleMenu(false);
+      }
+    },
+    [navigation, toggleMenu],
+  );
 
   const drawerItems = [
-    { name: 'Home', label: 'Home' },
-    { name: 'Explore', label: 'Explore' },
-    { name: 'TV', label: 'TV' },
+    {name: 'Home', label: 'Home'},
+    {name: 'Explore', label: 'Explore'},
+    {name: 'TV', label: 'TV'},
   ] as const;
 
   return (
-    <SpatialNavigationRoot isActive={isMenuOpen} onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
+    <SpatialNavigationRoot
+      isActive={isMenuOpen}
+      onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
       <View style={styles.drawerContainer}>
         {/* Gradient-like scrim overlay */}
         <View style={styles.scrimOverlay} />
@@ -41,13 +52,19 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
           contentContainerStyle={{
             paddingStart: 0,
             paddingEnd: 0,
-            ...(Platform.OS === 'ios' && Platform.isTV && { paddingTop: 0 }),
-          }}
-        >
+            ...(Platform.OS === 'ios' && Platform.isTV && {paddingTop: 0}),
+          }}>
           <View style={styles.header}>
-            <Image source={require('../assets/kepler.png')} style={styles.profilePic} />
-            <Text style={styles.userName} numberOfLines={1}>Pioneer Tom</Text>
-            <Text style={styles.switchAccount} numberOfLines={1}>Switch account</Text>
+            <Image
+              source={require('../assets/kepler.png')}
+              style={styles.profilePic}
+            />
+            <Text style={styles.userName} numberOfLines={1}>
+              Pioneer Tom
+            </Text>
+            <Text style={styles.switchAccount} numberOfLines={1}>
+              Switch account
+            </Text>
           </View>
           {drawerItems.map((item, index) =>
             index === 0 ? (
@@ -56,11 +73,21 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
                   onSelect={() => {
                     toggleMenu(false);
                     navigation.navigate(item.name);
-                  }}
-                >
-                  {({ isFocused }) => (
-                    <View style={[styles.menuItem, isFocused && styles.menuItemFocused]}>
-                      <Text style={[styles.menuText, isFocused && styles.menuTextFocused]} numberOfLines={1}>{item.label}</Text>
+                  }}>
+                  {({isFocused}) => (
+                    <View
+                      style={[
+                        styles.menuItem,
+                        isFocused && styles.menuItemFocused,
+                      ]}>
+                      <Text
+                        style={[
+                          styles.menuText,
+                          isFocused && styles.menuTextFocused,
+                        ]}
+                        numberOfLines={1}>
+                        {item.label}
+                      </Text>
                     </View>
                   )}
                 </SpatialNavigationFocusableView>
@@ -71,11 +98,21 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
                 onSelect={() => {
                   toggleMenu(false);
                   navigation.navigate(item.name);
-                }}
-              >
-                {({ isFocused }) => (
-                  <View style={[styles.menuItem, isFocused && styles.menuItemFocused]}>
-                    <Text style={[styles.menuText, isFocused && styles.menuTextFocused]} numberOfLines={1}>{item.label}</Text>
+                }}>
+                {({isFocused}) => (
+                  <View
+                    style={[
+                      styles.menuItem,
+                      isFocused && styles.menuItemFocused,
+                    ]}>
+                    <Text
+                      style={[
+                        styles.menuText,
+                        isFocused && styles.menuTextFocused,
+                      ]}
+                      numberOfLines={1}>
+                      {item.label}
+                    </Text>
                   </View>
                 )}
               </SpatialNavigationFocusableView>
@@ -89,12 +126,21 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
             onSelect={() => {
               toggleMenu(false);
               navigation.navigate('Settings');
-            }}
-          >
-            {({ isFocused }) => (
-              <View style={[styles.settingsButton, isFocused && styles.settingsButtonFocused]}>
+            }}>
+            {({isFocused}) => (
+              <View
+                style={[
+                  styles.settingsButton,
+                  isFocused && styles.settingsButtonFocused,
+                ]}>
                 <View style={styles.cogIcon}>
-                  <Text style={[styles.cogIconText, isFocused && styles.cogIconTextFocused]}>⚙</Text>
+                  <Text
+                    style={[
+                      styles.cogIconText,
+                      isFocused && styles.cogIconTextFocused,
+                    ]}>
+                    ⚙
+                  </Text>
                 </View>
               </View>
             )}
@@ -105,7 +151,7 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
   );
 }
 
-const createDrawerStyles = ({ colors, fontSize, focus }: Theme) =>
+const createDrawerStyles = ({colors, fontSize, focus}: Theme) =>
   StyleSheet.create({
     drawerContainer: {
       flex: 1,
@@ -174,7 +220,7 @@ const createDrawerStyles = ({ colors, fontSize, focus }: Theme) =>
     menuItemFocused: {
       backgroundColor: colors.focusBackground,
       borderColor: focus.borderColor,
-      transform: [{ scale: focus.scale }],
+      transform: [{scale: focus.scale}],
       shadowColor: colors.focus,
       shadowOffset: {
         width: 0,
@@ -219,7 +265,7 @@ const createDrawerStyles = ({ colors, fontSize, focus }: Theme) =>
     settingsButtonFocused: {
       backgroundColor: colors.focusBackground,
       borderColor: focus.borderColor,
-      transform: [{ scale: focus.scale }],
+      transform: [{scale: focus.scale}],
       shadowColor: colors.focus,
       shadowOffset: {
         width: 0,

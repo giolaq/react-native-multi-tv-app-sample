@@ -3,7 +3,10 @@
   "transform": {
     "^.+\\.tsx?$": "ts-jest"
   },
-  "setupFiles": ["./node_modules/@amazon-devices/react-native-kepler/jest/setup.js"],
+  "setupFiles": [
+    "../../packages/shared-ui/node_modules/@amazon-devices/react-native-kepler/jest/setup.js",
+    "../../packages/shared-ui/node_modules/react-native-gesture-handler/jestSetup.js"
+  ],
   "testRegex": "/test/.*\\.(test|spec)\\.(ts|tsx|js)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
   "moduleNameMapper": {

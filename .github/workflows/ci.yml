@@ -33,12 +33,9 @@ jobs:
       - name: Run lint
         run: yarn lint:all
   
-  # TypeScript check partially working (11 errors remain, down from 40+)
-  # See PR description for details on remaining type errors
   ci-typecheck:
-    name: TypeScript Check (with known errors)
+    name: TypeScript Check
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,4 +53,4 @@ jobs:
         run: yarn install --immutable
       
       - name: Run typecheck
-        run: yarn typecheck || echo "::warning::TypeScript check has known errors (11 remaining, down from 40+)"
+        run: yarn typecheck

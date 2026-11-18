@@ -4,9 +4,14 @@
     "eslint:recommended"
   ],
   "plugins": ["@typescript-eslint"],
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  },
-  "parser": "@typescript-eslint/parser",
-  "ignorePatterns": ["test/**/*.js"]
+  "ignorePatterns": ["test/**/*.js"],
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    }
+  ]
 }
