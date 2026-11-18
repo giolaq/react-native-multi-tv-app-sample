@@ -37,9 +37,16 @@ const VideoPlayer = React.memo(
       // Memoize source object to prevent unnecessary re-renders
       const videoSource = useMemo(() => ({ uri: movie }), [movie]);
 
-      // Memoize poster URL to prevent unnecessary re-renders
+      // Memoize poster object to prevent unnecessary re-renders
       const posterConfig = useMemo(
-        () => (Platform.OS === "web" || !headerImage ? undefined : headerImage),
+        () =>
+          Platform.OS === "web"
+            ? {}
+            : ({
+                source: { uri: headerImage },
+                resizeMode: "cover" as const,
+                style: { width: "100%", height: "100%" },
+              } as const),
         [headerImage],
       );
 

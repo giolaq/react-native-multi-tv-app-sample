@@ -46,10 +46,10 @@ class RemoteControlManager implements RemoteControlManagerInterface {
     }
   };
 
-  addKeydownListener = (listener: (event: SupportedKeys) => void): (() => void) => {
+  addKeydownListener = (listener: (event: SupportedKeys) => void): ((event: SupportedKeys) => void) => {
     this.eventEmitter.on('keyDown', listener);
     console.log('[RemoteControlManager.kepler] Key listener added');
-    return () => this.removeKeydownListener(listener);
+    return listener;
   };
 
   removeKeydownListener = (listener: (event: SupportedKeys) => void): void => {
