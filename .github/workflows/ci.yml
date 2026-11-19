@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci-format-check:
-    name: Format changed files
+    name: format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,3 +104,23 @@ jobs:
 
       - name: Bundle Vega for Kepler
         run: yarn workspace @multi-tv/vega exec react-native bundle --platform kepler --entry-file index.js --dev false --bundle-output "$RUNNER_TEMP/vega.bundle" --max-workers 2
+
+  hooks-executable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify tracked Husky hook modes
+        shell: bash
+        run: |
+          git ls-files --stage --error-unmatch -- .husky/commit-msg .husky/pre-commit |
+            awk '$1 != "100755" { print "Missing executable mode:", $4; failed = 1 } END { exit failed }'
+
+  check:
+    needs: [ci-lint-check, ci-typecheck, ci-test, ci-format-check, hooks-executable]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all CI jobs to pass
+        env:
+          ALL_PASSED: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+        run: test "$ALL_PASSED" = true
