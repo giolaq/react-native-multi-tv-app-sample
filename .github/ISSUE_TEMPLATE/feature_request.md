@@ -1,20 +1,16 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
-
+about: Describe a user need and its acceptance criteria
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## User need
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!-- Who needs this change, on which platforms, and what are they trying to do? -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## Acceptance criteria
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- Give a concrete user action and the outcome that would satisfy the request. -->
+
+## Context
+
+<!-- Include alternatives, constraints or supporting evidence if available. -->
