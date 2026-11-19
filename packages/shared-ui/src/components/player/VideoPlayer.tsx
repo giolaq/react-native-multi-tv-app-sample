@@ -14,6 +14,7 @@ interface VideoPlayerProps {
   onBuffer: (isBuffering: boolean) => void;
   onProgress: (currentTime: number) => void;
   onLoad: (duration: number) => void;
+  onError: () => void;
   onEnd: () => void;
 }
 
@@ -28,6 +29,7 @@ const VideoPlayer = React.memo(
         onBuffer,
         onProgress,
         onLoad,
+        onError,
         onEnd,
       },
       ref,
@@ -69,6 +71,7 @@ const VideoPlayer = React.memo(
           onBuffer={({ isBuffering }) => onBuffer(isBuffering)}
           onProgress={({ currentTime }) => onProgress(currentTime)}
           onLoad={({ duration }) => onLoad(duration)}
+          onError={onError}
           onEnd={onEnd}
           poster={posterConfig}
           resizeMode="cover"
