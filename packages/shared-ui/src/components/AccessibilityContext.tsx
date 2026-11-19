@@ -5,7 +5,7 @@ import {
   Theme,
   createTheme,
   defaultAccessibilityPreferences,
-  defaultTheme,
+  getDefaultTheme,
 } from '../theme/accessibility';
 
 interface AccessibilityContextType {
@@ -28,7 +28,7 @@ const AccessibilityContext = createContext<AccessibilityContextType>({
   overrides: {},
   setPreference: () => {},
   resetToSystem: () => {},
-  theme: defaultTheme,
+  theme: getDefaultTheme(),
 });
 
 type Subscription = { remove: () => void } | undefined;

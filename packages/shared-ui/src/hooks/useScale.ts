@@ -12,7 +12,16 @@ const designResolution = {
   height: 1080,
 };
 
-const { width, height } = Dimensions.get('window');
-const scale = Math.min(width / designResolution.width, height / designResolution.height);
+// Lazy-loaded scale value: read Dimensions on first use instead of at module load time.
+// This allows Jest to hoist mocks before Dimensions.get() is called.
+let cachedScale: number | null = null;
 
-export const scaledPixels = (size: number): number => size * scale;
+const getScale = (): number => {
+  if (cachedScale === null) {
+    const { width, height } = Dimensions.get('window');
+    cachedScale = Math.min(width / designResolution.width, height / designResolution.height);
+  }
+  return cachedScale;
+};
+
+export const scaledPixels = (size: number): number => size * getScale();
