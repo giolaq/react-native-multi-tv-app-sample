@@ -1,3 +1,4 @@
+import { accessibilityStore } from './app/accessibilityStore';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -45,5 +46,5 @@ export default function App() {
     }
   }, [loaded, error]);
 
-  return <AppNavigator fontsLoaded={loaded || !!error} />;
+  return <AppNavigator accessibilityStore={accessibilityStore} fontsLoaded={loaded || !!error} />;
 }
