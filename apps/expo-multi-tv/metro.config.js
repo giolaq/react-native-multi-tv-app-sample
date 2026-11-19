@@ -28,11 +28,10 @@ config.watchFolders = [...workspacePackages.map((pkg) => pkg.dir), path.resolve(
 
 config.resolver = {
   ...config.resolver,
+  // Shared UI installs development copies for typechecking. The TV app supplies the runtime.
+  blockList: [].concat(config.resolver.blockList || [], /[/\\]packages[/\\]shared-ui[/\\]node_modules[/\\]/),
   unstable_enableSymlinks: true,
-  nodeModulesPaths: [
-    path.resolve(__dirname, 'node_modules'),
-    path.resolve(__dirname, '../../node_modules'),
-  ],
+  nodeModulesPaths: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../../node_modules')],
   extraNodeModules: Object.fromEntries(workspacePackages.map((pkg) => [pkg.name, pkg.dir])),
 };
 
@@ -45,10 +44,7 @@ config.resolver = {
 //
 if (process.env?.EXPO_TV === '1') {
   const originalSourceExts = config.resolver.sourceExts;
-  const tvSourceExts = [
-    ...originalSourceExts.map((e) => `tv.${e}`),
-    ...originalSourceExts,
-  ];
+  const tvSourceExts = [...originalSourceExts.map((e) => `tv.${e}`), ...originalSourceExts];
   config.resolver.sourceExts = tvSourceExts;
 }
 

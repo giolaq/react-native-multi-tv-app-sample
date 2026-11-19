@@ -96,3 +96,11 @@ jobs:
 
       - name: Run tests
         run: yarn test:all
+
+      - name: Bundle Expo for Android TV
+        env:
+          EXPO_TV: '1'
+        run: yarn workspace @multi-tv/expo-multi-tv exec expo export --platform android --output-dir "$RUNNER_TEMP/android-tv" --max-workers 2
+
+      - name: Bundle Vega for Kepler
+        run: yarn workspace @multi-tv/vega exec react-native bundle --platform kepler --entry-file index.js --dev false --bundle-output "$RUNNER_TEMP/vega.bundle" --max-workers 2
