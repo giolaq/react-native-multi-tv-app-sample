@@ -20,6 +20,7 @@ module.exports = [
     plugins: {
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
       react: require('eslint-plugin-react'),
+      'react-hooks': require('eslint-plugin-react-hooks'),
       prettier: prettier,
     },
     rules: {
