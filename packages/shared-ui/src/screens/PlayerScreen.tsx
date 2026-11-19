@@ -53,6 +53,11 @@ export default function PlayerScreen() {
     showControls();
   }, [showControls]);
 
+  const handleProgress = useCallback((time: number) => {
+    currentTimeRef.current = time;
+    setCurrentTime(time);
+  }, []);
+
   const togglePausePlay = useCallback(() => {
     setPaused((prev) => !prev);
     showControls();
@@ -64,11 +69,11 @@ export default function PlayerScreen() {
     const handleKeyDown = (key: SupportedKeys) => {
       switch (key) {
         case SupportedKeys.Right:
-        case SupportedKeys.Rewind:
+        case SupportedKeys.FastForward:
           seek(currentTimeRef.current + 10);
           break;
         case SupportedKeys.Left:
-        case SupportedKeys.FastForward:
+        case SupportedKeys.Rewind:
           seek(currentTimeRef.current - 10);
           break;
         case SupportedKeys.Back:
@@ -106,7 +111,7 @@ export default function PlayerScreen() {
           paused={paused}
           controls={SHOW_NATIVE_CONTROLS}
           onBuffer={setIsVideoBuffering}
-          onProgress={setCurrentTime}
+          onProgress={handleProgress}
           onLoad={(duration) => (durationRef.current = duration)}
           onEnd={() => {
             setPaused(true);
