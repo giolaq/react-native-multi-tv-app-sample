@@ -24,7 +24,6 @@ export default function VegaCustomDrawerContent(props: DrawerContentComponentPro
   const drawerItems = [
     { name: 'Home', label: 'Home' },
     { name: 'Explore', label: 'Explore' },
-    { name: 'TV', label: 'TV' },
   ] as const;
 
   return (
