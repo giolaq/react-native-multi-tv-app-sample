@@ -31,3 +31,4 @@ apps/vega/buildinfo.json
 
 # Editor workspace files
 *.code-workspace
+.yarn/install-state.gz

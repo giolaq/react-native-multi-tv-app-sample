@@ -43,17 +43,20 @@ export default function PlayerScreen() {
     }, 5000);
   }, []);
 
-  const seek = useCallback((time: number) => {
-    if (time < 0) {
-      time = 0;
-    } else if (time > durationRef.current) {
-      time = durationRef.current;
-    }
-    videoRef.current?.seek(time);
-    currentTimeRef.current = time;
-    setCurrentTime(time);
-    showControls();
-  }, [showControls]);
+  const seek = useCallback(
+    (time: number) => {
+      if (time < 0) {
+        time = 0;
+      } else if (time > durationRef.current) {
+        time = durationRef.current;
+      }
+      videoRef.current?.seek(time);
+      currentTimeRef.current = time;
+      setCurrentTime(time);
+      showControls();
+    },
+    [showControls],
+  );
 
   const handleProgress = useCallback((time: number) => {
     currentTimeRef.current = time;
@@ -115,7 +118,9 @@ export default function PlayerScreen() {
     return (
       <SpatialNavigationRoot isActive={isFocused}>
         <View style={[playerStyles.container, playerStyles.errorPanel]}>
-          <Text accessibilityRole="alert" style={playerStyles.errorText}>Unable to play this video.</Text>
+          <Text accessibilityRole="alert" style={playerStyles.errorText}>
+            Unable to play this video.
+          </Text>
           <SpatialNavigationNode orientation="vertical">
             <View style={playerStyles.errorActions}>
               <DefaultFocus>
@@ -169,17 +174,17 @@ export default function PlayerScreen() {
 }
 
 const playerStyles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#000',
-    },
-    errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
-    errorActions: { gap: 20 },
-    errorText: { fontSize: 32, color: 'white' },
-    controlsContainer: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'space-between',
-      zIndex: 1,
-    },
-  });
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
+  errorActions: { gap: 20 },
+  errorText: { fontSize: 32, color: 'white' },
+  controlsContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'space-between',
+    zIndex: 1,
+  },
+});
