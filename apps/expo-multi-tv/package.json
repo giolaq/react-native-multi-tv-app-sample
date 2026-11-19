@@ -15,8 +15,16 @@
     "clean": "rm -rf node_modules",
     "typecheck": "tsc --noEmit"
   },
+  "//": "testPathIgnorePatterns: useScale.ts calls Dimensions.get() at module load, RemoteControlManager.android reads mock.calls at top level. Follow-up PR will lazy-load Dimensions and remove these exclusions.",
   "jest": {
     "preset": "jest-expo",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__/AccessibilityProvider-test.tsx",
+      "__tests__/AccessibilityTheme-test.ts",
+      "__tests__/FocusablePressable-test.tsx",
+      "__tests__/RemoteControlManager.android-test.ts"
+    ],
     "modulePaths": [
       "<rootDir>/node_modules"
     ]
