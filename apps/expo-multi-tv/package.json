@@ -9,25 +9,20 @@
     "ios": "EXPO_TV=1 expo run:ios",
     "web": "expo start --web --port 8082",
     "dev:web": "expo start --web --port 8082",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "expo lint",
     "prebuild": "EXPO_TV=1 expo prebuild --clean",
     "clean": "rm -rf node_modules",
     "typecheck": "tsc --noEmit"
   },
-  "//": "testPathIgnorePatterns: useScale.ts calls Dimensions.get() at module load, RemoteControlManager.android reads mock.calls at top level. Follow-up PR will lazy-load Dimensions and remove these exclusions.",
   "jest": {
     "preset": "jest-expo",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "__tests__/AccessibilityProvider-test.tsx",
-      "__tests__/AccessibilityTheme-test.ts",
-      "__tests__/FocusablePressable-test.tsx",
-      "__tests__/RemoteControlManager.android-test.ts"
-    ],
     "modulePaths": [
       "<rootDir>/node_modules"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^(react|react-native|react-native-keyevent|react-tv-space-navigation|@react-navigation/native|react-native-video)$": "<rootDir>/node_modules/$1"
+    }
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",

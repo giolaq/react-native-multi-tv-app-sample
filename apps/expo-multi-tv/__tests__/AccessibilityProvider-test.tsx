@@ -1,4 +1,3 @@
-// Skipped: useScale.ts reads Dimensions.get() at module load (before Jest mocks), AccessibilityInfo native module unavailable in CI. Follow-up PR will lazy-load Dimensions.
 import React from 'react';
 import { AccessibilityInfo } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
@@ -51,7 +50,7 @@ beforeEach(() => {
   os({ reduceMotion: false, highContrast: false });
 });
 
-describe.skip('AccessibilityProvider', () => {
+describe('AccessibilityProvider', () => {
   it('starts from the device settings', async () => {
     os({ reduceMotion: true, highContrast: true });
     await renderProvider();
