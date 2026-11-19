@@ -2,11 +2,25 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
+  pr-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test PR handoff validation
+        run: python3 -B -m unittest discover -s .github/scripts -p 'test_pr_evidence.py'
+      - name: Check submitted PR evidence
+        if: github.event_name == 'pull_request'
+        run: python3 -B .github/scripts/check_pr_evidence.py
+
   ci-format-check:
     name: format
     runs-on: ubuntu-latest
@@ -116,7 +130,7 @@ jobs:
             awk '$1 != "100755" { print "Missing executable mode:", $4; failed = 1 } END { exit failed }'
 
   check:
-    needs: [ci-lint-check, ci-typecheck, ci-test, ci-format-check, hooks-executable]
+    needs: [ci-lint-check, ci-typecheck, ci-test, ci-format-check, hooks-executable, pr-evidence]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:

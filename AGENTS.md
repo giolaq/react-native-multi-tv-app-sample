@@ -1,126 +1,31 @@
-# Agent Operating Rules
+# Agent operating rules
 
-**For any AI coding agent working in this repository:** Read this file before making changes.
+Read this file before developing in this repository. It applies to local, hosted and CI agents, including workers receiving a handoff. A short question can be answered directly. Only the repository owner (@giolaq) merges pull requests.
 
-## Core Operating Rule
+## Development handoff
 
-For anything beyond a short question, follow the handoff loop:
+1. **Coordinator — capture intent.** Start from the user's request or an existing GitHub issue. Check for ongoing work. Record the affected users and platforms, the observable change that would satisfy the request, the base branch and the blast radius. When asked to prioritize competing issues, compare reach, impact, confidence and effort (RICE), and identify the risk separately.
+2. **Coordinator — assign a worker.** Give one coding agent the task, scope, acceptance criteria and return requirements in an isolated workspace. A worker who already received this assignment starts at step 3. For a tool without delegation, supply the brief to a separate coding session. A branch or worktree separates changes. Use the runner's sandbox or container to isolate files and credentials. Give workers only the access needed for their task. Keep production credentials, signing keys, personal sessions and merge privileges out of worker environments.
+3. **Worker — reproduce first.** For a bug, reproduce the reported failure on the base revision. For a behavior change, write an acceptance test and observe the expected failure before implementing. Make fixtures self-contained so CI can repeat the test. If the failure cannot be reproduced, return the attempt and the missing evidence to the coordinator. For documentation, specify the observable check that confirms the edit.
+4. **Worker — implement and try to break the fix.** Exercise the normal user entry point and the failure cases that could invalidate it, such as repeated remote input or leaving a screen during a load. Review the full diff against the assigned base. Return the commit, changed behavior, exact commands and results, affected platforms and outstanding limitations.
+5. **Coordinator — verify independently.** Inspect the diff and rerun the acceptance check against the worker's commit. Compare the result with the original criteria. Record which checks ran on a physical device, emulator or test renderer. Return failures to the worker with a reproducer. For repeated mistakes, improve the code or type boundary first, add a deterministic regression test or lint rule, then update these instructions if a judgment call remains.
+6. **Submit and report.** Open one PR for the change using the [PR template](.github/PULL_REQUEST_TEMPLATE.md). Include the request, acceptance evidence, blast radius, review level and gaps. Verify the GitHub checks for the latest pushed commit, including after review fixes. Report the PR, commit, checks link and observed results in the originating conversation. Leave the merge to @giolaq.
 
-1. **Collect intent** → Read issue/ticket, clarify acceptance criteria, classify blast radius
-2. **Write acceptance test first** (TDD) → Test must run in CI with no manual setup
-3. **Reproduce in isolation** → Verify the failure on your machine
-4. **Implement fix-and-fuzz** → Write fix + tests that try to break it
-5. **Capture proof** → Commands run + exact output + GitHub CI status on latest commit
-6. **Open PR (never merge)** → Fill template completely
-7. **Report back** → Proof + blast radius + review level + deferred items + decisions needed
-8. **Respond to review** → If changes requested, repeat from step 3
+## Verification and review
 
-**When correcting mistakes:** Move fixes up the trust stack—code first, then lint/test, then update this file. Review is last resort, not first defense.
+Install with `yarn install --immutable`. Run `yarn lint:all`, `yarn typecheck` and `yarn test:all`. Pass the changed supported file paths to `yarn format:check --` for a read-only formatting check. Record failures that also reproduce on the base. Preserve hooks, tests and required checks. Obtain owner approval before introducing dependencies.
 
-## Repository Commands
+| Blast radius | Examples                                                                                                                                                                                                      | Review and proof                                                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Green        | Documentation, comments, small refactors without a behavior change                                                                                                                                            | AI level 1. Inspect the diff and verify the applicable checks.                                                                                                                   |
+| Yellow       | Shared UI, navigation, playback, remote input, focus or dependencies                                                                                                                                          | AI level 2. Include acceptance tests and manual TV QA for UI. Use level 3 for cross-platform changes, with edge cases, platform builds and QA on Vega and one other TV platform. |
+| Red          | Signing, credentials, authentication, payment or user data, native or release configuration (including `react-native.config.js` and `eas.json`), store builds, deployment, CI policy or repository protection | Human review by @giolaq. Identify the failure impact. Verify affected targets, and record staging and security checks where applicable.                                          |
 
-```bash
-# Install
-yarn install --immutable
+If a required device or environment is unavailable, identify the unverified behavior and the review needed. Never report a skipped check as passed. Never commit secrets or bypass CI.
 
-# Lint
-yarn lint:all
-yarn workspace @multi-tv/expo-multi-tv lint
-yarn workspace @multi-tv/vega lint
+## TV acceptance checks
 
-# Typecheck
-yarn typecheck
-yarn workspace @multi-tv/expo-multi-tv typecheck
-yarn workspace @multi-tv/vega typecheck
-
-# Test
-yarn test:all
-yarn workspace @multi-tv/vega test
-
-# Format
-yarn format          # Auto-fix
-yarn format --check  # Check only
-
-# Build (Expo: requires EXPO_TV=1)
-EXPO_TV=1 yarn workspace @multi-tv/expo-multi-tv start
-EXPO_TV=1 yarn workspace @multi-tv/expo-multi-tv android
-
-# Build (Vega: uses react-native build-vega)
-yarn workspace @multi-tv/vega build:release
-```
-
-## TV Platform-Specific Rules
-
-This is a **React Native TV app** for Android TV, tvOS, Fire TV (Fire OS + Vega OS), and Web TV. Key constraints agents miss:
-
-1. **D-pad focus navigation is mandatory**
-   - Test every UI change with remote D-pad (↑↓←→ Select Back)
-   - Visual correctness ≠ navigable UI
-   - If focus order is wrong, the app is unusable
-
-2. **Platform file extensions**
-   - `.kepler.ts` = Vega (Fire TV), `.android.ts` = Android TV, `.ios.ts` = tvOS, `.ts` = default
-   - Example: `RemoteControlManager.kepler.ts`, `RemoteControlManager.android.ts`, `RemoteControlManager.ios.ts`
-   - If editing one variant, check if change applies to others
-   - Never import platform-specific code in shared files
-
-3. **Remote control events differ per platform**
-   - Vega uses `TVEventHandler` + `HWEvent`
-   - tvOS uses native remote APIs
-   - Don't copy keyboard handlers from web examples
-
-4. **Video playback uses different APIs**
-   - Vega: `@amazon-devices/react-native-w3cmedia` (W3C Media APIs)
-   - Others: `react-native-video`
-   - Test video changes on Vega AND at least one non-Vega platform
-
-5. **Build commands are platform-specific**
-   - Expo apps: always prefix with `EXPO_TV=1`
-   - Vega apps: use `react-native build-vega`, not `react-native run-android`
-   - Don't unify unless tested on all platforms
-
-## Blast Radius
-
-Classify every PR:
-
-- **🔴 Red (Human review required):** App signing, release configs (`eas.json`), credentials, native modules, store builds, deployment
-- **🟡 Yellow (Thorough testing):** Features in shared-ui, navigation, video/remote control, focus management, dependencies
-- **🟢 Green (Light review):** Docs, comments, non-breaking single-file refactors
-
-When in doubt, classify as more critical. Justify your choice in the PR.
-
-## Review Levels
-
-- **Human:** Required for all red changes
-- **AI Level 1 (Basic):** CI passes, template complete, blast radius reasonable
-- **AI Level 2 (Standard):** Level 1 + acceptance test + proof + manual QA
-- **AI Level 3 (Thorough):** Level 2 + two-platform testing + fuzz tests + platform variant checks
-
-## Hard Rules
-
-1. **Never merge PRs** (only @giolaq merges)
-2. **Never commit secrets** (API keys, signing certs, `.env` files)
-3. **Never add dependencies without approval** (ask in PR description first)
-4. **Never bypass CI** (no `--no-verify`, no disabling checks)
-5. **Acceptance tests run in CI with zero manual setup** (tests start their own servers/fixtures)
-
-## Proof Requirements
-
-Every PR must include:
-
-1. Commands + exact output (`yarn typecheck`, `yarn lint:all`, `yarn test:all`)
-2. GitHub CI status on latest commit (link to checks page)
-3. For TV UI changes: D-pad navigation tested, Vega + one other platform
-
-Not sufficient: "I tested locally" without commands, or CI from an earlier commit.
-
-## Before Opening PR
-
-- [ ] Review full `git diff` against base branch
-- [ ] Remove debug logs, commented code, unaddressed TODOs
-- [ ] Update platform variants (`.kepler.ts`, `.android.ts`, `.ios.ts`) if applicable
-- [ ] Verify CI passes on pushed commit
-
-## Questions?
-
-Open an issue or ping @giolaq. For detailed explanations, see `docs/trust-stack-assessment.md`.
+- Exercise Up, Down, Left, Right, Select and Back on each changed UI flow. Use the existing spatial navigation components. Confirm each action is reachable, Back returns to the intended screen, and focus survives the return. For focus changes, check RTL order, large text and high contrast.
+- Inspect the base file and its `.kepler`, `.vega`, `.android` and `.ios` variants where present. Keep platform imports in the appropriate variant. Verify the affected bundles and explain platform-specific behavior.
+- Vega uses `TVEventHandler` and `HWEvent`; tvOS uses native remote APIs. For playback or remote changes, test Vega and a non-Vega TV, including Play/Pause, Rewind and Fast Forward. Vega playback uses `@amazon-devices/react-native-w3cmedia`; Expo uses `react-native-video`.
+- Use `EXPO_TV=1` for Expo TV builds. Vega uses the workspace scripts that invoke `react-native build-vega`. The [CI workflow](.github/workflows/ci.yml) contains the commands for both JavaScript bundles. Record native installation and playback separately from bundling.
