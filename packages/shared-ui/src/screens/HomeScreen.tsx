@@ -24,31 +24,21 @@ import { getOpenDrawerDirection } from '../utils/rtl';
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawerNavigator'>;
 
 // Memoized MovieItem component to prevent unnecessary re-renders and optimize image source
-const MovieItem = React.memo(
-  ({
-    item,
-    isFocused,
-    styles,
-  }: {
-    item: CardData;
-    isFocused: boolean;
-    styles: any;
-  }) => {
-    const imageSource = useMemo(() => ({ uri: item.headerImage }), [item.headerImage]);
+const MovieItem = React.memo(({ item, isFocused, styles }: { item: CardData; isFocused: boolean; styles: any }) => {
+  const imageSource = useMemo(() => ({ uri: item.headerImage }), [item.headerImage]);
 
-    return (
-      <View style={[styles.highlightThumbnail, isFocused && styles.highlightThumbnailFocused]}>
-        <Image
-          source={imageSource}
-          style={styles.cardImage}
-          resizeMode="cover"
-          onError={(error) => console.log('Image load error:', item.title, error.nativeEvent.error)}
-          onLoad={() => console.log('Image loaded:', item.title)}
-        />
-      </View>
-    );
-  },
-);
+  return (
+    <View style={[styles.highlightThumbnail, isFocused && styles.highlightThumbnailFocused]}>
+      <Image
+        source={imageSource}
+        style={styles.cardImage}
+        resizeMode="cover"
+        onError={(error) => console.log('Image load error:', item.title, error.nativeEvent.error)}
+        onLoad={() => console.log('Image loaded:', item.title)}
+      />
+    </View>
+  );
+});
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -89,35 +79,28 @@ export default function HomeScreen() {
     [focusedItem?.headerImage],
   );
 
-  const renderHeader = useCallback(
-    () => {
-      if (!focusedItem) return null;
+  const renderHeader = useCallback(() => {
+    if (!focusedItem) return null;
 
-      return (
-        <View style={gridStyles.header}>
-          <Image
-            style={gridStyles.headerImage}
-            source={headerImageSource}
-            resizeMode="cover"
-          />
-          {/* Linear gradient scrim for left overlay */}
-          <PlatformLinearGradient
-            colors={['rgba(0,0,0,0.9)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)', 'transparent']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={gridStyles.gradientLeft}
-          />
-          <View style={gridStyles.headerTextContainer}>
-            <Text style={gridStyles.headerTitle}>{focusedItem.title}</Text>
-            <Text style={gridStyles.headerDescription} numberOfLines={3}>
-              {focusedItem.description}
-            </Text>
-          </View>
+    return (
+      <View style={gridStyles.header}>
+        <Image style={gridStyles.headerImage} source={headerImageSource} resizeMode="cover" />
+        {/* Linear gradient scrim for left overlay */}
+        <PlatformLinearGradient
+          colors={['rgba(0,0,0,0.9)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={gridStyles.gradientLeft}
+        />
+        <View style={gridStyles.headerTextContainer}>
+          <Text style={gridStyles.headerTitle}>{focusedItem.title}</Text>
+          <Text style={gridStyles.headerDescription} numberOfLines={3}>
+            {focusedItem.description}
+          </Text>
         </View>
-      );
-    },
-    [headerImageSource, focusedItem],
-  );
+      </View>
+    );
+  }, [headerImageSource, focusedItem]);
 
   const onDirectionHandledWithoutMovement = useCallback(
     (movement: Direction) => {

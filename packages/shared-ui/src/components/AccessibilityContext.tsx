@@ -81,11 +81,13 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
     const subscriptions = [
       watchSystemSetting(AccessibilityInfo.isReduceMotionEnabled, 'reduceMotionChanged', update('reduceMotion')),
       ...(accessibilityInfoWithHighContrast.isHighTextContrastEnabled
-        ? [watchSystemSetting(
-            accessibilityInfoWithHighContrast.isHighTextContrastEnabled,
-            'highTextContrastChanged',
-            update('highContrast'),
-          )]
+        ? [
+            watchSystemSetting(
+              accessibilityInfoWithHighContrast.isHighTextContrastEnabled,
+              'highTextContrastChanged',
+              update('highContrast'),
+            ),
+          ]
         : []),
     ];
     // Larger text has no system query on purpose: React Native already scales <Text> by the
