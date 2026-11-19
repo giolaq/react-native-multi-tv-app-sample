@@ -117,10 +117,12 @@ export default function PlayerScreen() {
         <View style={[playerStyles.container, playerStyles.errorPanel]}>
           <Text accessibilityRole="alert" style={playerStyles.errorText}>Unable to play this video.</Text>
           <SpatialNavigationNode orientation="vertical">
-            <DefaultFocus>
-              <FocusablePressable text="Retry" onSelect={retry} />
-            </DefaultFocus>
-            <FocusablePressable text="Back" onSelect={() => navigation.goBack()} />
+            <View style={playerStyles.errorActions}>
+              <DefaultFocus>
+                <FocusablePressable text="Retry" onSelect={retry} />
+              </DefaultFocus>
+              <FocusablePressable text="Back" onSelect={() => navigation.goBack()} />
+            </View>
           </SpatialNavigationNode>
         </View>
       </SpatialNavigationRoot>
@@ -172,6 +174,7 @@ const playerStyles = StyleSheet.create({
       backgroundColor: '#000',
     },
     errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
+    errorActions: { gap: 20 },
     errorText: { fontSize: 32, color: 'white' },
     controlsContainer: {
       ...StyleSheet.absoluteFillObject,
