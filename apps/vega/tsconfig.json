@@ -1,19 +1,15 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "types": [
-      "jest",
-      "@amazon-devices/react-native-kepler"
-    ]
+    "types": ["jest", "@amazon-devices/react-native-kepler", "node"],
+    "moduleSuffixes": [".vega", ".kepler", ""]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "test/**/*.ts",
-    "test/**/*.tsx"
+    "test/**/*.tsx",
+    "../../packages/shared-ui/src/types/react-native-tvos.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "build"
-  ]
+  "exclude": ["node_modules", "build"]
 }

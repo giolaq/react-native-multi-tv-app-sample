@@ -33,6 +33,11 @@ const AccessibilityContext = createContext<AccessibilityContextType>({
 
 type Subscription = { remove: () => void } | undefined;
 
+// Type guard for AccessibilityInfo with optional high contrast API
+interface AccessibilityInfoWithHighContrast {
+  isHighTextContrastEnabled?: () => Promise<boolean>;
+}
+
 // Each platform reports a different subset: Android TV, Fire OS and Vega OS report reduce motion
 // and high text contrast, tvOS reports reduce motion, the web reads prefers-reduced-motion. Vega OS
 // sends no reduceMotionChanged event, so there reduce motion is read once, at launch.
@@ -48,6 +53,7 @@ const watchSystemSetting = (
   }
   query.call(AccessibilityInfo).then(onChange, () => {});
   try {
+    // @ts-ignore: highTextContrastChanged event exists on some TV platforms but not in standard React Native types
     return AccessibilityInfo.addEventListener(eventName, onChange) as Subscription;
   } catch {
     return undefined;
@@ -71,13 +77,18 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
         setSystemPreferences((current) => (current[key] === enabled ? current : { ...current, [key]: enabled }));
       }
     };
+    const accessibilityInfoWithHighContrast = AccessibilityInfo as AccessibilityInfoWithHighContrast;
     const subscriptions = [
       watchSystemSetting(AccessibilityInfo.isReduceMotionEnabled, 'reduceMotionChanged', update('reduceMotion')),
-      watchSystemSetting(
-        AccessibilityInfo.isHighTextContrastEnabled,
-        'highTextContrastChanged',
-        update('highContrast'),
-      ),
+      ...(accessibilityInfoWithHighContrast.isHighTextContrastEnabled
+        ? [
+            watchSystemSetting(
+              accessibilityInfoWithHighContrast.isHighTextContrastEnabled,
+              'highTextContrastChanged',
+              update('highContrast'),
+            ),
+          ]
+        : []),
     ];
     // Larger text has no system query on purpose: React Native already scales <Text> by the
     // device font size where the platform has one, so reading it here would apply it twice.
