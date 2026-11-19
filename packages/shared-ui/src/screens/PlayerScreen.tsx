@@ -30,7 +30,7 @@ export default function PlayerScreen() {
   const videoRef = useRef<VideoRef>(null);
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTimeRef = useRef<number>(0);
-  const durationRef = useRef<number>(0);
+  const [duration, setDuration] = useState(0);
 
   const showControls = useCallback(() => {
     setControlsVisible(true);
@@ -46,14 +46,14 @@ export default function PlayerScreen() {
   const seek = useCallback((time: number) => {
     if (time < 0) {
       time = 0;
-    } else if (time > durationRef.current) {
-      time = durationRef.current;
+    } else if (time > duration) {
+      time = duration;
     }
     videoRef.current?.seek(time);
     currentTimeRef.current = time;
     setCurrentTime(time);
     showControls();
-  }, [showControls]);
+  }, [duration, showControls]);
 
   const handleProgress = useCallback((time: number) => {
     currentTimeRef.current = time;
@@ -96,17 +96,23 @@ export default function PlayerScreen() {
     };
   }, [seek, togglePausePlay, showControls, failed, isFocused]);
 
-  // Show controls when video starts
-  useEffect(() => {
-    if (durationRef.current && !SHOW_NATIVE_CONTROLS) {
+  useEffect(() => () => {
+    if (hideControlsTimeoutRef.current !== null) {
+      clearTimeout(hideControlsTimeoutRef.current);
+    }
+  }, []);
+
+  const handleLoad = useCallback((loadedDuration: number) => {
+    setDuration(loadedDuration);
+    if (loadedDuration > 0 && !SHOW_NATIVE_CONTROLS) {
       showControls();
     }
-  }, [durationRef.current, showControls]);
+  }, [showControls]);
 
   if (failed) {
     const retry = () => {
       currentTimeRef.current = 0;
-      durationRef.current = 0;
+      setDuration(0);
       setCurrentTime(0);
       setPaused(false);
       setFailed(false);
@@ -140,7 +146,7 @@ export default function PlayerScreen() {
           controls={SHOW_NATIVE_CONTROLS}
           onBuffer={setIsVideoBuffering}
           onProgress={handleProgress}
-          onLoad={(duration) => (durationRef.current = duration)}
+          onLoad={handleLoad}
           onError={() => {
             setControlsVisible(false);
             setIsVideoBuffering(false);
@@ -152,14 +158,14 @@ export default function PlayerScreen() {
           }}
         />
 
-        {!SHOW_NATIVE_CONTROLS && !!durationRef.current && (
+        {!SHOW_NATIVE_CONTROLS && duration > 0 && (
           <VideoOverlay
             visible={controlsVisible}
             paused={paused}
             onPlayPause={togglePausePlay}
             onExit={() => navigation.goBack()}
             currentTime={currentTime}
-            duration={durationRef.current}
+            duration={duration}
             isBuffering={isVideoBuffering}
           />
         )}
