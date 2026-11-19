@@ -3402,7 +3402,27 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@multi-tv/shared-ui@workspace:packages/shared-ui"
   dependencies:
+    "@amazon-devices/kepler-media-controls": "npm:~1.0.25"
+    "@amazon-devices/react-native-kepler": "npm:~4.0.0+rn0.83.0"
+    "@amazon-devices/react-native-w3cmedia": "npm:~2.3.2"
+    "@bam.tech/lrud": "npm:~8.0.2"
+    "@react-navigation/drawer": "npm:^7.0.0"
+    "@react-navigation/native": "npm:^7.0.0"
+    "@react-navigation/native-stack": "npm:^7.0.0"
+    "@types/jest": "npm:^29.5.12"
     "@types/react": "npm:~19.1.0"
+    "@typescript-eslint/eslint-plugin": "npm:^8.12.2"
+    "@typescript-eslint/parser": "npm:^8.12.2"
+    eslint: "npm:^9.13.0"
+    eslint-plugin-react: "npm:^7.37.1"
+    eslint-plugin-react-hooks: "npm:^5.1.0"
+    jest: "npm:^29.7.0"
+    react-native: "npm:0.83.0"
+    react-native-gesture-handler: "npm:^2.31.2"
+    react-native-keyevent: "npm:^0.3.2"
+    react-native-screens: "npm:^4.30.1"
+    react-native-video: "npm:^6.8.0"
+    react-tv-space-navigation: "npm:6.0.0-beta1"
     typescript: "npm:~5.7.0"
   peerDependencies:
     "@react-navigation/native": "*"
@@ -7521,6 +7541,15 @@ __metadata:
     eslint-config-prettier:
       optional: true
   checksum: 10c0/091449b28c77ab2efbbf674e977181f2c8453d95a4df68218bddd87a4dfaa9ecc4eda60164e416f5986fb5d577e66e8d8e1e23d81e8555f8d735375598b03257
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-react-hooks@npm:^5.1.0":
+  version: 5.2.0
+  resolution: "eslint-plugin-react-hooks@npm:5.2.0"
+  peerDependencies:
+    eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
+  checksum: 10c0/1c8d50fa5984c6dea32470651807d2922cc3934cf3425e78f84a24c2dfd972e7f019bee84aefb27e0cf2c13fea0ac1d4473267727408feeb1c56333ca1489385
   languageName: node
   linkType: hard
 
@@ -13937,8 +13966,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-native-multi-tv-app-sample@workspace:."
   dependencies:
+    "@typescript-eslint/eslint-plugin": "npm:^8.12.2"
+    "@typescript-eslint/parser": "npm:^8.12.2"
+    eslint: "npm:^9.13.0"
+    eslint-plugin-prettier: "npm:^5.2.1"
+    eslint-plugin-react: "npm:^7.37.1"
+    eslint-plugin-react-hooks: "npm:^5.1.0"
     husky: "npm:^9.1.6"
     prettier: "npm:^3.3.3"
+    typescript: "npm:~5.7.0"
   languageName: unknown
   linkType: soft
 
@@ -13995,6 +14031,19 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/49299e694ed20cf5a8c0f86702eb77df03f5b7353d9b73e7415bb593ac5ff3aa4dfe76b1e9d8efb0fd926917e507f02f13e0a8791c8833910080454b66d99943
+  languageName: node
+  linkType: hard
+
+"react-native-screens@npm:^4.30.1":
+  version: 4.30.1
+  resolution: "react-native-screens@npm:4.30.1"
+  dependencies:
+    react-freeze: "npm:^1.0.0"
+    warn-once: "npm:^0.1.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/e5ded425ece1819d56fa84dacffa30178a9b9af1e9350ae99f3b78a9cb21795886c6f74ca1fe1b89e7bb65a56733246c40bf57d5b470d9d7bbf10ad0fa117690
   languageName: node
   linkType: hard
 

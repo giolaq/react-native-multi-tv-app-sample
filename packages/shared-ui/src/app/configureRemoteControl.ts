@@ -4,7 +4,7 @@ import RemoteControlManager from './remote-control/RemoteControlManager';
 
 SpatialNavigation.configureRemoteControl({
   remoteControlSubscriber: (callback) => {
-    console.log("Configure remote control");
+    console.log('Configure remote control');
 
     const mapping: { [key in SupportedKeys]: Directions | null } = {
       [SupportedKeys.Right]: Directions.RIGHT,
@@ -13,6 +13,9 @@ SpatialNavigation.configureRemoteControl({
       [SupportedKeys.Down]: Directions.DOWN,
       [SupportedKeys.Enter]: Directions.ENTER,
       [SupportedKeys.Back]: null,
+      [SupportedKeys.PlayPause]: null,
+      [SupportedKeys.FastForward]: null,
+      [SupportedKeys.Rewind]: null,
     };
 
     const remoteControlListener = (keyEvent: SupportedKeys) => {

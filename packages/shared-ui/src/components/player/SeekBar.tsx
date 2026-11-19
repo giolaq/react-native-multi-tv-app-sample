@@ -1,6 +1,6 @@
-import React from "react";
-import { View, StyleSheet, I18nManager } from "react-native";
-import { scaledPixels } from "../../hooks/useScale";
+import React from 'react';
+import { View, StyleSheet, I18nManager } from 'react-native';
+import { scaledPixels } from '../../hooks/useScale';
 
 interface SeekBarProps {
   currentTime: number;
@@ -13,13 +13,12 @@ const SeekBar = React.memo(({ currentTime, duration }: SeekBarProps) => {
     return (currentTime / duration) * 100;
   }, [currentTime, duration]);
 
-  const thumbPosition = I18nManager.isRTL
-    ? { right: `${percentage}%` }
-    : { left: `${percentage}%` };
+  const thumbPosition = I18nManager.isRTL ? { right: `${percentage}%` } : { left: `${percentage}%` };
 
   return (
     <View style={seekBarStyles.seekbarContainer}>
       <View style={seekBarStyles.seekbarTrack} />
+      {/* @ts-expect-error: percentage string (e.g. "50%") is valid for left/right but types expect DimensionValue */}
       <View style={[seekBarStyles.seekbarThumb, thumbPosition]} />
     </View>
   );
@@ -29,21 +28,21 @@ const seekBarStyles = StyleSheet.create({
   seekbarContainer: {
     flex: 1,
     height: scaledPixels(40),
-    justifyContent: "center",
+    justifyContent: 'center',
     marginEnd: scaledPixels(80),
   },
   seekbarTrack: {
-    width: "100%",
+    width: '100%',
     height: scaledPixels(5),
-    backgroundColor: "#888",
+    backgroundColor: '#888',
     borderRadius: scaledPixels(2.5),
   },
   seekbarThumb: {
-    position: "absolute",
+    position: 'absolute',
     width: scaledPixels(20),
     height: scaledPixels(20),
     borderRadius: scaledPixels(10),
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
 });
 

@@ -2,83 +2,125 @@ name: CI
 
 on:
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
 
 jobs:
-  # Placeholder CI workflow for trust-stack implementation
-  #
-  # All standard checks (lint, typecheck, test, format) are currently broken on main.
-  # See docs/trust-stack-assessment.md for full details.
-  #
-  # To enable CI, fix the issues documented in the assessment, then uncomment the jobs below.
-  
-  ci-placeholder:
-    name: CI Placeholder
+  ci-format-check:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+      - run: yarn install --immutable
+      - name: Check formatting
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ "$BASE_SHA" =~ ^0+$ ]]; then
+            BASE_SHA=$(git hash-object -t tree /dev/null)
+          fi
+          git diff --name-only -z --diff-filter=ACMR "$BASE_SHA" HEAD -- \
+            '*.js' '*.jsx' '*.ts' '*.tsx' '*.json' '*.md' '*.yml' '*.yaml' |
+            xargs -0 -r yarn format:check --
+
+  ci-lint-check:
+    name: Lint Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: CI Status
-        run: |
-          echo "::notice::CI checks are disabled because existing lint/typecheck/test/format fail on main branch."
-          echo "::notice::See docs/trust-stack-assessment.md for details and recommended fixes."
-          echo "::notice::This is intentional: the trust-stack PR documents what's broken without fixing it."
 
-  # Uncomment these jobs after fixing the issues documented in docs/trust-stack-assessment.md:
-  #
-  # ci-format-check:
-  #   name: Format Check
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'yarn'
-  #     - run: corepack enable
-  #     - run: yarn install --immutable
-  #     - run: yarn format --check
-  #
-  # ci-lint-check:
-  #   name: Lint Check
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'yarn'
-  #     - run: corepack enable
-  #     - run: yarn install --immutable
-  #     - run: yarn lint:all
-  #
-  # ci-typecheck:
-  #   name: TypeScript Check
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'yarn'
-  #     - run: corepack enable
-  #     - run: yarn install --immutable
-  #     - run: yarn typecheck
-  #
-  # ci-test:
-  #   name: Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'yarn'
-  #     - run: corepack enable
-  #     - run: yarn install --immutable
-  #     - run: yarn test:all
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run lint
+        run: yarn lint:all
+
+  ci-typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run typecheck
+        run: yarn typecheck
+
+  ci-test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn test:all
+
+      - name: Bundle Expo for Android TV
+        env:
+          EXPO_TV: '1'
+        run: yarn workspace @multi-tv/expo-multi-tv exec expo export --platform android --output-dir "$RUNNER_TEMP/android-tv" --max-workers 2
+
+      - name: Bundle Vega for Kepler
+        run: yarn workspace @multi-tv/vega exec react-native bundle --platform kepler --entry-file index.js --dev false --bundle-output "$RUNNER_TEMP/vega.bundle" --max-workers 2
+
+  hooks-executable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify tracked Husky hook modes
+        shell: bash
+        run: |
+          git ls-files --stage --error-unmatch -- .husky/commit-msg .husky/pre-commit |
+            awk '$1 != "100755" { print "Missing executable mode:", $4; failed = 1 } END { exit failed }'
+
+  check:
+    needs: [ci-lint-check, ci-typecheck, ci-test, ci-format-check, hooks-executable]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all CI jobs to pass
+        env:
+          ALL_PASSED: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+        run: test "$ALL_PASSED" = true

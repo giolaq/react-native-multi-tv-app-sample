@@ -1,15 +1,26 @@
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { createDrawerNavigator } from '@amazon-devices/react-navigation__drawer';
-import { useNavigation, DrawerActions } from '@amazon-devices/react-navigation__native';
-import { useMenuContext, useTheme, scaledPixels, HomeScreen, ExploreScreen, TVScreen, SettingsScreen } from '@multi-tv/shared-ui';
+import {useEffect} from 'react';
+import {StyleSheet, View} from 'react-native';
+import {createDrawerNavigator} from '@amazon-devices/react-navigation__drawer';
+import {
+  useNavigation,
+  DrawerActions,
+} from '@amazon-devices/react-navigation__native';
+import {
+  useMenuContext,
+  useTheme,
+  scaledPixels,
+  HomeScreen,
+  ExploreScreen,
+  TVScreen,
+  SettingsScreen,
+} from '@multi-tv/shared-ui';
 import VegaCustomDrawerContent from '../components/VegaCustomDrawerContent';
-import { DrawerParamList } from './types';
+import {DrawerParamList} from './types';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
 function DrawerSyncWrapper() {
-  const { isOpen: isMenuOpen } = useMenuContext();
+  const {isOpen: isMenuOpen} = useMenuContext();
   const navigation = useNavigation();
 
   // Open drawer on mount if menu context says it should be open
@@ -24,9 +35,9 @@ function DrawerSyncWrapper() {
 
 export default function VegaDrawerNavigator() {
   const styles = drawerStyles;
-  const { fontScale } = useTheme();
+  const {fontScale} = useTheme();
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <Drawer.Navigator
         drawerContent={VegaCustomDrawerContent}
         initialRouteName="Home"
@@ -37,16 +48,16 @@ export default function VegaDrawerNavigator() {
           drawerActiveTintColor: '#ffffff',
           drawerInactiveTintColor: '#bdc3c7',
           // The labels are one line long, so the drawer grows with Larger text to keep them whole.
-          drawerStyle: [styles.drawerStyle, { width: scaledPixels(DRAWER_WIDTH * fontScale) }],
+          drawerStyle: [
+            styles.drawerStyle,
+            {width: scaledPixels(DRAWER_WIDTH * fontScale)},
+          ],
           drawerLabelStyle: styles.drawerLabelStyle,
           // Use 'front' type to allow drawer to open/close (collapse/expand)
           // Disable swipe gestures since we use remote control navigation
           drawerType: 'front',
           swipeEnabled: false,
-          // Disable animations to avoid Reanimated worklet issues on TV
-          animationEnabled: false,
-        }}
-      >
+        }}>
         <Drawer.Screen
           name="Home"
           component={HomeScreen}
@@ -84,13 +95,13 @@ export default function VegaDrawerNavigator() {
 const DRAWER_WIDTH = 300;
 
 const drawerStyles = StyleSheet.create({
-    drawerStyle: {
-      backgroundColor: '#2c3e50',
-      paddingTop: scaledPixels(0),
-    },
-    drawerLabelStyle: {
-      fontSize: scaledPixels(18),
-      fontWeight: 'bold',
-      marginLeft: scaledPixels(10),
-    },
-  });
+  drawerStyle: {
+    backgroundColor: '#2c3e50',
+    paddingTop: scaledPixels(0),
+  },
+  drawerLabelStyle: {
+    fontSize: scaledPixels(18),
+    fontWeight: 'bold',
+    marginLeft: scaledPixels(10),
+  },
+});
