@@ -1,16 +1,35 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer, DarkTheme } from '@amazon-devices/react-navigation__native';
-import { Platform } from 'react-native';
-import { GestureHandlerRootView } from '@amazon-devices/react-native-gesture-handler';
-import { AccessibilityProvider, MenuProvider } from '@multi-tv/shared-ui';
+import React, {useEffect} from 'react';
+import {
+  NavigationContainer,
+  DarkTheme,
+} from '@amazon-devices/react-navigation__native';
+import {Platform} from 'react-native';
+import {GestureHandlerRootView} from '@amazon-devices/react-native-gesture-handler';
+import {AccessibilityProvider, MenuProvider} from '@multi-tv/shared-ui';
+import {AsyncStorage} from '@amazon-devices/react-native-kepler';
+import {
+  createOverrideStore,
+  overridesKey,
+} from '@multi-tv/shared-ui/src/theme/overrideStore';
 import VegaRootNavigator from './VegaRootNavigator';
+
+const accessibilityStore = createOverrideStore({
+  read: () => AsyncStorage.getItem(overridesKey),
+  write: (value) =>
+    value === null
+      ? AsyncStorage.removeItem(overridesKey)
+      : AsyncStorage.setItem(overridesKey, value),
+});
 
 export interface VegaAppNavigatorProps {
   fontsLoaded?: boolean;
   onReady?: () => void;
 }
 
-export default function VegaAppNavigator({ fontsLoaded = true, onReady }: VegaAppNavigatorProps) {
+export default function VegaAppNavigator({
+  fontsLoaded = true,
+  onReady,
+}: VegaAppNavigatorProps) {
   useEffect(() => {
     // Import remote control config for TV platforms
     if (Platform.isTV) {
@@ -34,8 +53,8 @@ export default function VegaAppNavigator({ fontsLoaded = true, onReady }: VegaAp
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AccessibilityProvider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <AccessibilityProvider store={accessibilityStore}>
         <NavigationContainer theme={DarkTheme}>
           <MenuProvider>
             <VegaRootNavigator />

@@ -35,7 +35,7 @@ const render = async (overrides: Partial<AccessibilityPreferences>, style?: View
   return { button, label };
 };
 
-describe.skip('FocusablePressable', () => {
+describe('FocusablePressable', () => {
   beforeEach(() => {
     mockFocused = false;
   });

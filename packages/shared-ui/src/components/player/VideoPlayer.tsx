@@ -1,10 +1,6 @@
-import React, { useMemo } from "react";
-import Video, { VideoRef } from "react-native-video";
-import {
-  StyleSheet,
-  Platform,
-  useWindowDimensions,
-} from "react-native";
+import React, { useMemo } from 'react';
+import Video, { VideoRef } from 'react-native-video';
+import { StyleSheet, Platform, useWindowDimensions } from 'react-native';
 
 interface VideoPlayerProps {
   movie: string;
@@ -14,24 +10,13 @@ interface VideoPlayerProps {
   onBuffer: (isBuffering: boolean) => void;
   onProgress: (currentTime: number) => void;
   onLoad: (duration: number) => void;
+  onError: () => void;
   onEnd: () => void;
 }
 
 const VideoPlayer = React.memo(
   React.forwardRef<VideoRef, VideoPlayerProps>(
-    (
-      {
-        movie,
-        headerImage,
-        paused,
-        controls,
-        onBuffer,
-        onProgress,
-        onLoad,
-        onEnd,
-      },
-      ref,
-    ) => {
+    ({ movie, headerImage, paused, controls, onBuffer, onProgress, onLoad, onError, onEnd }, ref) => {
       const { width } = useWindowDimensions();
 
       // Memoize source object to prevent unnecessary re-renders
@@ -40,24 +25,18 @@ const VideoPlayer = React.memo(
       // Memoize poster object to prevent unnecessary re-renders
       const posterConfig = useMemo(
         () =>
-          Platform.OS === "web"
+          Platform.OS === 'web'
             ? {}
             : ({
                 source: { uri: headerImage },
-                resizeMode: "cover" as const,
-                style: { width: "100%", height: "100%" },
+                resizeMode: 'cover' as const,
+                style: { width: '100%', height: '100%' },
               } as const),
         [headerImage],
       );
 
       // Calculate video style based on current dimensions
-      const videoStyle = useMemo(
-        () => [
-          videoPlayerStyles.video,
-          { height: width * (9 / 16) },
-        ],
-        [width],
-      );
+      const videoStyle = useMemo(() => [videoPlayerStyles.video, { height: width * (9 / 16) }], [width]);
 
       return (
         <Video
@@ -69,6 +48,7 @@ const VideoPlayer = React.memo(
           onBuffer={({ isBuffering }) => onBuffer(isBuffering)}
           onProgress={({ currentTime }) => onProgress(currentTime)}
           onLoad={({ duration }) => onLoad(duration)}
+          onError={onError}
           onEnd={onEnd}
           poster={posterConfig}
           resizeMode="cover"
@@ -80,7 +60,7 @@ const VideoPlayer = React.memo(
 
 const videoPlayerStyles = StyleSheet.create({
   video: {
-    width: "100%",
+    width: '100%',
   },
 });
 

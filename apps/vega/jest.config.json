@@ -4,20 +4,18 @@
     "^.+\\.tsx?$": "ts-jest"
   },
   "setupFiles": [
-    "../../packages/shared-ui/node_modules/@amazon-devices/react-native-kepler/jest/setup.js",
-    "../../packages/shared-ui/node_modules/react-native-gesture-handler/jestSetup.js"
+    "<rootDir>/node_modules/@amazon-devices/react-native-kepler/jest/setup.js",
+    "<rootDir>/node_modules/@amazon-devices/react-native-gesture-handler/jestSetup.js"
   ],
   "testRegex": "/test/.*\\.(test|spec)\\.(ts|tsx|js)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
   "moduleNameMapper": {
-    "^~/(.*)$": "<rootDir>/src/$1"
+    "^~/(.*)$": "<rootDir>/src/$1",
+    "^(react|react-native|react-tv-space-navigation)$": "<rootDir>/node_modules/$1",
+    "^@react-navigation/(.*)$": "<rootDir>/node_modules/@amazon-devices/react-navigation__$1"
   },
   "modulePaths": ["<rootDir>/src", "<rootDir>/node_modules"],
-  "roots": [
-    "<rootDir>/src/",
-    "<rootDir>/test/",
-    "<rootDir>/node_modules/"
-  ],
+  "roots": ["<rootDir>/src/", "<rootDir>/test/", "<rootDir>/node_modules/"],
   "collectCoverage": false,
   "coverageReporters": ["json", "json-summary", "lcov", "text"],
   "collectCoverageFrom": [
