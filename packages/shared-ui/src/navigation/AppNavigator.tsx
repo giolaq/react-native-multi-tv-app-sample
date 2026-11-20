@@ -6,12 +6,15 @@ import { AccessibilityProvider } from '../components/AccessibilityContext';
 import { GoBackConfiguration } from '../app/remote-control/GoBackConfiguration';
 import RootNavigator from './RootNavigator';
 
+import type { OverrideStore } from '../theme/overrideStore';
+
 export interface AppNavigatorProps {
   fontsLoaded?: boolean;
+  accessibilityStore?: OverrideStore;
   onReady?: () => void;
 }
 
-export default function AppNavigator({ fontsLoaded = true, onReady }: AppNavigatorProps) {
+export default function AppNavigator({ fontsLoaded = true, onReady, accessibilityStore }: AppNavigatorProps) {
   useEffect(() => {
     // Import remote control config for TV platforms
     if (Platform.isTV) {
@@ -35,7 +38,7 @@ export default function AppNavigator({ fontsLoaded = true, onReady }: AppNavigat
 
   return (
     <StrictMode>
-      <AccessibilityProvider>
+      <AccessibilityProvider store={accessibilityStore}>
         <NavigationContainer theme={DarkTheme}>
           <MenuProvider>
             <GoBackConfiguration />

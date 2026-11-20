@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import {
   AccessibilityPreferences,
@@ -7,6 +7,8 @@ import {
   defaultAccessibilityPreferences,
   defaultTheme,
 } from '../theme/accessibility';
+
+import type { OverrideStore } from '../theme/overrideStore';
 
 interface AccessibilityContextType {
   /** What the app uses: the device settings, with any choice made in Settings on top. */
@@ -62,13 +64,31 @@ const watchSystemSetting = (
 
 interface AccessibilityProviderProps {
   children: React.ReactNode;
+  store?: OverrideStore;
   /** Start with these choices instead of following the device (tests, or a saved profile). */
   initialOverrides?: Partial<AccessibilityPreferences>;
 }
 
-export const AccessibilityProvider = ({ children, initialOverrides = {} }: AccessibilityProviderProps) => {
+export const AccessibilityProvider = ({ children, initialOverrides, store }: AccessibilityProviderProps) => {
   const [systemPreferences, setSystemPreferences] = useState(defaultAccessibilityPreferences);
-  const [overrides, setOverrides] = useState<Partial<AccessibilityPreferences>>(initialOverrides);
+  const [overrides, setOverrides] = useState<Partial<AccessibilityPreferences>>(initialOverrides ?? {});
+  const latest = useRef(overrides);
+  const [loaded, setLoaded] = useState(!store || initialOverrides !== undefined);
+
+  useEffect(() => {
+    if (!store || initialOverrides !== undefined) return;
+    let active = true;
+    store.load().then((saved) => {
+      if (active) {
+        latest.current = saved;
+        setOverrides(saved);
+        setLoaded(true);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [store, initialOverrides]);
 
   useEffect(() => {
     let active = true;
@@ -98,11 +118,23 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
     };
   }, []);
 
-  const setPreference = useCallback((key: keyof AccessibilityPreferences, value: boolean) => {
-    setOverrides((current) => ({ ...current, [key]: value }));
-  }, []);
+  const applyOverrides = useCallback(
+    (next: Partial<AccessibilityPreferences>) => {
+      latest.current = next;
+      setOverrides(next);
+      store?.save(next);
+    },
+    [store],
+  );
 
-  const resetToSystem = useCallback(() => setOverrides({}), []);
+  const setPreference = useCallback(
+    (key: keyof AccessibilityPreferences, value: boolean) => {
+      applyOverrides({ ...latest.current, [key]: value });
+    },
+    [applyOverrides],
+  );
+
+  const resetToSystem = useCallback(() => applyOverrides({}), [applyOverrides]);
 
   const preferences = useMemo(() => ({ ...systemPreferences, ...overrides }), [systemPreferences, overrides]);
   const theme = useMemo(() => createTheme(preferences), [preferences]);
@@ -112,6 +144,7 @@ export const AccessibilityProvider = ({ children, initialOverrides = {} }: Acces
     [preferences, systemPreferences, overrides, setPreference, resetToSystem, theme],
   );
 
+  if (!loaded) return null;
   return <AccessibilityContext.Provider value={value}>{children}</AccessibilityContext.Provider>;
 };
 

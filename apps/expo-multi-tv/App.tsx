@@ -1,3 +1,4 @@
+import { accessibilityStore } from './app/accessibilityStore';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -9,10 +10,7 @@ import '../../packages/shared-ui/src/app/configureRemoteControl';
 // These warnings come from libraries using deprecated React methods
 if (__DEV__) {
   // Suppress in LogBox
-  LogBox.ignoreLogs([
-    /findNodeHandle is deprecated/,
-    /findHostInstance_DEPRECATED is deprecated/,
-  ]);
+  LogBox.ignoreLogs([/findNodeHandle is deprecated/, /findHostInstance_DEPRECATED is deprecated/]);
 
   // Also suppress at console level for warnings that slip through
   const originalWarn = console.warn;
@@ -45,5 +43,5 @@ export default function App() {
     }
   }, [loaded, error]);
 
-  return <AppNavigator fontsLoaded={loaded || !!error} />;
+  return <AppNavigator accessibilityStore={accessibilityStore} fontsLoaded={loaded || !!error} />;
 }
