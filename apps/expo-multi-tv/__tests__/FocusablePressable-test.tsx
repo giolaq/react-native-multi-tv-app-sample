@@ -1,4 +1,4 @@
-// Skipped: FocusablePressable imports useScale.ts which reads Dimensions.get() at module load. Follow-up PR will lazy-load Dimensions.
+// Skipped: FocusablePressable imports react-tv-space-navigation which requires complex native module mocking (StyleSheet -> NativeReactNativeFeatureFlags at module load).
 import React from 'react';
 import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
