@@ -5,6 +5,7 @@ import VideoPlayer from '../../../packages/shared-ui/src/components/player/Video
 import RemoteControlManager from '../../../packages/shared-ui/src/app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../../../packages/shared-ui/src/app/remote-control/SupportedKeys';
 
+jest.mock('../../../packages/shared-ui/src/components/FocusablePressable', () => 'Button');
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
   StyleSheet: { create: (styles: object) => styles },
