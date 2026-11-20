@@ -61,3 +61,27 @@ it('seeks from playback progress, accumulates rapid presses and clamps at both e
     jest.useRealTimers();
   }
 });
+
+it('shows controls on load before the first progress event and cancels auto-hide on exit', async () => {
+  jest.useFakeTimers();
+  const schedule = jest.spyOn(global, 'setTimeout');
+  const cancel = jest.spyOn(global, 'clearTimeout');
+  let tree!: TestRenderer.ReactTestRenderer;
+  try {
+    await act(async () => {
+      tree = TestRenderer.create(<PlayerScreen />);
+    });
+    await act(async () => {
+      tree.root.findByType(VideoPlayer).props.onLoad(120);
+    });
+    expect(tree.root.findByProps({ duration: 120, visible: true }).props.currentTime).toBe(0);
+    const timerIndex = schedule.mock.calls.findIndex(([, delay]) => delay === 5000);
+    expect(timerIndex).toBeGreaterThanOrEqual(0);
+    await act(async () => tree.unmount());
+    expect(cancel).toHaveBeenCalledWith(schedule.mock.results[timerIndex].value);
+  } finally {
+    schedule.mockRestore();
+    cancel.mockRestore();
+    jest.useRealTimers();
+  }
+});
