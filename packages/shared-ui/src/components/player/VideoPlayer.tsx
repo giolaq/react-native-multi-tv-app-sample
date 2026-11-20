@@ -10,12 +10,13 @@ interface VideoPlayerProps {
   onBuffer: (isBuffering: boolean) => void;
   onProgress: (currentTime: number) => void;
   onLoad: (duration: number) => void;
+  onError: () => void;
   onEnd: () => void;
 }
 
 const VideoPlayer = React.memo(
   React.forwardRef<VideoRef, VideoPlayerProps>(
-    ({ movie, headerImage, paused, controls, onBuffer, onProgress, onLoad, onEnd }, ref) => {
+    ({ movie, headerImage, paused, controls, onBuffer, onProgress, onLoad, onError, onEnd }, ref) => {
       const { width } = useWindowDimensions();
 
       // Memoize source object to prevent unnecessary re-renders
@@ -47,6 +48,7 @@ const VideoPlayer = React.memo(
           onBuffer={({ isBuffering }) => onBuffer(isBuffering)}
           onProgress={({ currentTime }) => onProgress(currentTime)}
           onLoad={({ duration }) => onLoad(duration)}
+          onError={onError}
           onEnd={onEnd}
           poster={posterConfig}
           resizeMode="cover"

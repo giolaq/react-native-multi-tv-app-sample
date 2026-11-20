@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, Platform, StyleSheet } from 'react-native';
-import { SpatialNavigationRoot } from 'react-tv-space-navigation';
+import { Text, View, Platform, StyleSheet } from 'react-native';
+import { DefaultFocus, SpatialNavigationNode, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import RemoteControlManager from '../app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../app/remote-control/SupportedKeys';
+import FocusablePressable from '../components/FocusablePressable';
 import VideoOverlay from '../components/player/VideoOverlay';
 import { VideoRef } from 'react-native-video';
 import VideoPlayer from '../components/player/VideoPlayer';
@@ -21,6 +22,7 @@ export default function PlayerScreen() {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
   const { movie, headerImage } = route.params;
   const isFocused = useIsFocused();
+  const [failed, setFailed] = useState(false);
   const [paused, setPaused] = useState<boolean>(false);
   const [controlsVisible, setControlsVisible] = useState<boolean>(false);
   const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(false);
@@ -67,7 +69,7 @@ export default function PlayerScreen() {
   }, [showControls]);
 
   useEffect(() => {
-    if (SHOW_NATIVE_CONTROLS) return;
+    if (SHOW_NATIVE_CONTROLS || failed || !isFocused) return;
 
     const handleKeyDown = (key: SupportedKeys) => {
       switch (key) {
@@ -80,8 +82,8 @@ export default function PlayerScreen() {
           seek(currentTimeRef.current - 10);
           break;
         case SupportedKeys.Back:
-          navigation.goBack();
-          break;
+          // GoBackConfiguration handles this key for the navigation stack.
+          return;
         case SupportedKeys.PlayPause:
           togglePausePlay();
           break;
@@ -95,7 +97,7 @@ export default function PlayerScreen() {
     return () => {
       RemoteControlManager.removeKeydownListener(listener);
     };
-  }, [seek, togglePausePlay, showControls, navigation]);
+  }, [seek, togglePausePlay, showControls, failed, isFocused]);
 
   // Show controls when video starts
   useEffect(() => {
@@ -103,6 +105,34 @@ export default function PlayerScreen() {
       showControls();
     }
   }, [durationRef.current, showControls]);
+
+  if (failed) {
+    const retry = () => {
+      currentTimeRef.current = 0;
+      durationRef.current = 0;
+      setCurrentTime(0);
+      setPaused(false);
+      setFailed(false);
+    };
+
+    return (
+      <SpatialNavigationRoot isActive={isFocused}>
+        <View style={[playerStyles.container, playerStyles.errorPanel]}>
+          <Text accessibilityRole="alert" style={playerStyles.errorText}>
+            Unable to play this video.
+          </Text>
+          <SpatialNavigationNode orientation="vertical">
+            <View style={playerStyles.errorActions}>
+              <DefaultFocus>
+                <FocusablePressable text="Retry" onSelect={retry} />
+              </DefaultFocus>
+              <FocusablePressable text="Back" onSelect={() => navigation.goBack()} />
+            </View>
+          </SpatialNavigationNode>
+        </View>
+      </SpatialNavigationRoot>
+    );
+  }
 
   return (
     <SpatialNavigationRoot isActive={isFocused && Platform.OS === 'android'}>
@@ -116,6 +146,11 @@ export default function PlayerScreen() {
           onBuffer={setIsVideoBuffering}
           onProgress={handleProgress}
           onLoad={(duration) => (durationRef.current = duration)}
+          onError={() => {
+            setControlsVisible(false);
+            setIsVideoBuffering(false);
+            setFailed(true);
+          }}
           onEnd={() => {
             setPaused(true);
             navigation.goBack();
@@ -143,6 +178,9 @@ const playerStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
+  errorActions: { gap: 20 },
+  errorText: { fontSize: 32, color: 'white' },
   controlsContainer: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
