@@ -112,4 +112,11 @@ export const createTheme = (preferences: AccessibilityPreferences): Theme => {
   };
 };
 
-export const defaultTheme = createTheme(defaultAccessibilityPreferences);
+// Lazy-loaded default theme: avoid calling createTheme (which uses scaledPixels -> Dimensions) at module load.
+let cachedDefaultTheme: Theme | null = null;
+export const getDefaultTheme = (): Theme => {
+  if (cachedDefaultTheme === null) {
+    cachedDefaultTheme = createTheme(defaultAccessibilityPreferences);
+  }
+  return cachedDefaultTheme;
+};

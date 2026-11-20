@@ -5,7 +5,7 @@ import {
   Theme,
   createTheme,
   defaultAccessibilityPreferences,
-  defaultTheme,
+  getDefaultTheme,
 } from '../theme/accessibility';
 
 import type { OverrideStore } from '../theme/overrideStore';
@@ -24,13 +24,16 @@ interface AccessibilityContextType {
 }
 
 // Without a provider, screens get the standard theme and the switches do nothing.
+// Context default uses a getter to avoid calling getDefaultTheme() at module load.
 const AccessibilityContext = createContext<AccessibilityContextType>({
   preferences: defaultAccessibilityPreferences,
   systemPreferences: defaultAccessibilityPreferences,
   overrides: {},
   setPreference: () => {},
   resetToSystem: () => {},
-  theme: defaultTheme,
+  get theme() {
+    return getDefaultTheme();
+  },
 });
 
 type Subscription = { remove: () => void } | undefined;

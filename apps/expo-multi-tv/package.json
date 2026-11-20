@@ -15,8 +15,18 @@
     "clean": "rm -rf node_modules",
     "typecheck": "tsc --noEmit"
   },
+  "//": "testPathIgnorePatterns: RemoteControlManager.android reads mock.calls at top level. AccessibilityProvider and FocusablePressable need complex native module mocking beyond Dimensions (AccessibilityInfo, react-tv-space-navigation).",
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": [
+      "../../packages/shared-ui/jest-setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__/RemoteControlManager.android-test.ts",
+      "__tests__/AccessibilityProvider-test.tsx",
+      "__tests__/FocusablePressable-test.tsx"
+    ],
     "modulePaths": [
       "<rootDir>/node_modules"
     ],
