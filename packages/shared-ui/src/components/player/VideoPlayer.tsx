@@ -42,11 +42,11 @@ const VideoPlayer = React.memo(
         () =>
           Platform.OS === "web"
             ? {}
-            : {
+            : ({
                 source: { uri: headerImage },
                 resizeMode: "cover" as const,
                 style: { width: "100%", height: "100%" },
-              },
+              } as const),
         [headerImage],
       );
 

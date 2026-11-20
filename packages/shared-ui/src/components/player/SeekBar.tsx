@@ -20,6 +20,7 @@ const SeekBar = React.memo(({ currentTime, duration }: SeekBarProps) => {
   return (
     <View style={seekBarStyles.seekbarContainer}>
       <View style={seekBarStyles.seekbarTrack} />
+      {/* @ts-expect-error: percentage string (e.g. "50%") is valid for left/right but types expect DimensionValue */}
       <View style={[seekBarStyles.seekbarThumb, thumbPosition]} />
     </View>
   );
