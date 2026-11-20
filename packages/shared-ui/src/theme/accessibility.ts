@@ -120,12 +120,3 @@ export const getDefaultTheme = (): Theme => {
   }
   return cachedDefaultTheme;
 };
-
-/**
- * @deprecated Use getDefaultTheme() instead. This lazy alias is provided for compatibility.
- */
-export const defaultTheme: Theme = new Proxy({} as Theme, {
-  get(_target, prop) {
-    return getDefaultTheme()[prop as keyof Theme];
-  },
-});
