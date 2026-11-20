@@ -18,7 +18,6 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
   const drawerItems = [
     { name: 'Home', label: 'Home' },
     { name: 'Explore', label: 'Explore' },
-    { name: 'TV', label: 'TV' },
   ] as const;
 
   const onDirectionHandledWithoutMovement = useCallback(
