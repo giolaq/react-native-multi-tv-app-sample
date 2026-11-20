@@ -41,17 +41,25 @@ export default function PlayerScreen() {
     }, 5000);
   }, []);
 
-  const seek = useCallback((time: number) => {
-    if (time < 0) {
-      time = 0;
-    } else if (time > durationRef.current) {
-      time = durationRef.current;
-    }
-    videoRef.current?.seek(time);
+  const seek = useCallback(
+    (time: number) => {
+      if (time < 0) {
+        time = 0;
+      } else if (time > durationRef.current) {
+        time = durationRef.current;
+      }
+      videoRef.current?.seek(time);
+      currentTimeRef.current = time;
+      setCurrentTime(time);
+      showControls();
+    },
+    [showControls],
+  );
+
+  const handleProgress = useCallback((time: number) => {
     currentTimeRef.current = time;
     setCurrentTime(time);
-    showControls();
-  }, [showControls]);
+  }, []);
 
   const togglePausePlay = useCallback(() => {
     setPaused((prev) => !prev);
@@ -64,11 +72,11 @@ export default function PlayerScreen() {
     const handleKeyDown = (key: SupportedKeys) => {
       switch (key) {
         case SupportedKeys.Right:
-        case SupportedKeys.Rewind:
+        case SupportedKeys.FastForward:
           seek(currentTimeRef.current + 10);
           break;
         case SupportedKeys.Left:
-        case SupportedKeys.FastForward:
+        case SupportedKeys.Rewind:
           seek(currentTimeRef.current - 10);
           break;
         case SupportedKeys.Back:
@@ -106,7 +114,7 @@ export default function PlayerScreen() {
           paused={paused}
           controls={SHOW_NATIVE_CONTROLS}
           onBuffer={setIsVideoBuffering}
-          onProgress={setCurrentTime}
+          onProgress={handleProgress}
           onLoad={(duration) => (durationRef.current = duration)}
           onEnd={() => {
             setPaused(true);
@@ -131,14 +139,14 @@ export default function PlayerScreen() {
 }
 
 const playerStyles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#000',
-    },
-    controlsContainer: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'space-between',
-      zIndex: 1,
-    },
-  });
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  controlsContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'space-between',
+    zIndex: 1,
+  },
+});
