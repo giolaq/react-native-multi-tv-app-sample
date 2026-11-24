@@ -14,6 +14,9 @@ type HomeRow = {
 
 const FIRST_NEW_RELEASE_YEAR = 2022;
 
+const hasYear = (item: CardData): item is CardData & { releaseYear: number } =>
+  typeof item.releaseYear === 'number' && Number.isFinite(item.releaseYear);
+
 const homeRowDefinitions: readonly HomeRowDefinition[] = [
   {
     key: 'trending',
@@ -23,14 +26,12 @@ const homeRowDefinitions: readonly HomeRowDefinition[] = [
   {
     key: 'new-releases',
     title: 'New Releases',
-    select: (items) =>
-      items.filter((item) => item.releaseYear !== undefined && item.releaseYear >= FIRST_NEW_RELEASE_YEAR),
+    select: (items) => items.filter((item) => hasYear(item) && item.releaseYear >= FIRST_NEW_RELEASE_YEAR),
   },
   {
     key: 'archive',
     title: 'From the Archive',
-    select: (items) =>
-      items.filter((item) => item.releaseYear !== undefined && item.releaseYear < FIRST_NEW_RELEASE_YEAR),
+    select: (items) => items.filter((item) => hasYear(item) && item.releaseYear < FIRST_NEW_RELEASE_YEAR),
   },
 ];
 

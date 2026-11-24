@@ -1,4 +1,24 @@
-import type TestRenderer from 'react-test-renderer';
+import React from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
+import TestRenderer from 'react-test-renderer';
+import Home from '../../../packages/shared-ui/src/screens/HomeScreen';
+import { createCatalogStore, type CatalogStore } from '../../../packages/shared-ui/src/data/catalogStore';
+import { fetchMoviesData } from '../../../packages/shared-ui/src/data/moviesData';
+
+// React Native loads these on first access. Loading them here keeps that cold cost out of the first test's timeout.
+void [Image, Pressable, Text, View];
+
+// A fresh store per test, instead of resetting every module and reloading React Native inside each test.
+const mockStore: { current?: CatalogStore } = {};
+jest.mock('../../../packages/shared-ui/src/data/catalogStore', () =>
+  Object.defineProperty(
+    { ...jest.requireActual('../../../packages/shared-ui/src/data/catalogStore') },
+    'catalogStore',
+    {
+      get: () => mockStore.current,
+    },
+  ),
+);
 
 const mockDispatch = jest.fn();
 const mockToggleMenu = jest.fn();
@@ -57,6 +77,7 @@ beforeEach(() => {
   mockDispatch.mockReset();
   mockToggleMenu.mockReset();
   globalWithFetch.fetch = fetchMock;
+  mockStore.current = createCatalogStore(fetchMoviesData);
 });
 afterEach(() => jest.restoreAllMocks());
 afterAll(() => {
@@ -64,16 +85,12 @@ afterAll(() => {
 });
 
 async function renderHome() {
-  jest.resetModules();
-  const React = require('react');
-  const renderer: typeof TestRenderer = require('react-test-renderer');
-  const Home = require('../../../packages/shared-ui/src/screens/HomeScreen').default;
   let tree!: TestRenderer.ReactTestRenderer;
-  await renderer.act(async () => {
-    tree = renderer.create(React.createElement(Home));
+  await TestRenderer.act(async () => {
+    tree = TestRenderer.create(<Home />);
   });
-  await renderer.act(async () => {});
-  return { tree, act: renderer.act };
+  await TestRenderer.act(async () => {});
+  return { tree, act: TestRenderer.act };
 }
 
 const hasText = (tree: TestRenderer.ReactTestRenderer, text: string) =>
