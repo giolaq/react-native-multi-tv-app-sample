@@ -1,4 +1,25 @@
-import type TestRenderer from 'react-test-renderer';
+import React from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
+import TestRenderer from 'react-test-renderer';
+import Home from '../../../packages/shared-ui/src/screens/HomeScreen';
+import Explore from '../../../packages/shared-ui/src/screens/ExploreScreen';
+import { createCatalogStore, type CatalogStore } from '../../../packages/shared-ui/src/data/catalogStore';
+import { fetchMoviesData } from '../../../packages/shared-ui/src/data/moviesData';
+
+// React Native loads these on first access. Loading them here keeps that cold cost out of the first test's timeout.
+void [Image, Pressable, Text, View];
+
+// A fresh store per test, instead of resetting every module and reloading React Native inside each test.
+const mockStore: { current?: CatalogStore } = {};
+jest.mock('../../../packages/shared-ui/src/data/catalogStore', () =>
+  Object.defineProperty(
+    { ...jest.requireActual('../../../packages/shared-ui/src/data/catalogStore') },
+    'catalogStore',
+    {
+      get: () => mockStore.current,
+    },
+  ),
+);
 
 jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => true,
@@ -52,17 +73,7 @@ const fail = () => Promise.resolve({ ok: false, status: 503 });
 const homeRows = (tree: TestRenderer.ReactTestRenderer) =>
   tree.root.findAll((node) => (node.type as unknown) === 'SpatialList')[0].props.data;
 
-const flush = (act: typeof TestRenderer.act) => act(async () => {});
-
-// Each test gets a fresh module registry, and with it a fresh catalog store.
-function load() {
-  jest.resetModules();
-  const React = require('react');
-  const renderer: typeof TestRenderer = require('react-test-renderer');
-  const Home = require('../../../packages/shared-ui/src/screens/HomeScreen').default;
-  const Explore = require('../../../packages/shared-ui/src/screens/ExploreScreen').default;
-  return { React, renderer, Home, Explore };
-}
+const flush = () => TestRenderer.act(async () => {});
 
 const fetchMock = jest.fn();
 const globalWithFetch = globalThis as unknown as { fetch: typeof fetchMock };
@@ -73,6 +84,7 @@ afterEach(() => jest.restoreAllMocks());
 beforeEach(() => {
   fetchMock.mockReset();
   globalWithFetch.fetch = fetchMock;
+  mockStore.current = createCatalogStore(fetchMoviesData);
 });
 afterAll(() => {
   globalWithFetch.fetch = originalFetch;
@@ -80,25 +92,24 @@ afterAll(() => {
 
 it('issues one catalog request for Home and Explore and shows the same titles on both', async () => {
   fetchMock.mockImplementation(ok);
-  const { React, renderer, Home, Explore } = load();
   let home!: TestRenderer.ReactTestRenderer;
   let explore!: TestRenderer.ReactTestRenderer;
-  await renderer.act(async () => {
-    home = renderer.create(React.createElement(Home));
-    explore = renderer.create(React.createElement(Explore));
+  await TestRenderer.act(async () => {
+    home = TestRenderer.create(<Home />);
+    explore = TestRenderer.create(<Explore />);
   });
-  await flush(renderer.act);
+  await flush();
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(homeRows(home)).toHaveLength(1);
   expect(explore.root.findAllByProps({ accessibilityLabel: 'Alpha' }).length).toBeGreaterThan(0);
 
-  await renderer.act(async () => {
+  await TestRenderer.act(async () => {
     explore.unmount();
-    explore = renderer.create(React.createElement(Explore));
+    explore = TestRenderer.create(<Explore />);
   });
   expect(fetchMock).toHaveBeenCalledTimes(1);
-  await renderer.act(async () => {
+  await TestRenderer.act(async () => {
     home.unmount();
     explore.unmount();
   });
@@ -107,28 +118,27 @@ it('issues one catalog request for Home and Explore and shows the same titles on
 it('reports a failed load on Explore and fetches again only when Retry is selected', async () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
   fetchMock.mockImplementationOnce(fail).mockImplementation(ok);
-  const { React, renderer, Home, Explore } = load();
   let home!: TestRenderer.ReactTestRenderer;
   let explore!: TestRenderer.ReactTestRenderer;
-  await renderer.act(async () => {
-    home = renderer.create(React.createElement(Home));
-    explore = renderer.create(React.createElement(Explore));
+  await TestRenderer.act(async () => {
+    home = TestRenderer.create(<Home />);
+    explore = TestRenderer.create(<Explore />);
   });
-  await flush(renderer.act);
+  await flush();
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(explore.root.findAllByProps({ children: 'Unable to load the catalog.' }).length).toBeGreaterThan(0);
   expect(home.root.findAllByProps({ children: 'Loading movies...' }).length).toBeGreaterThan(0);
 
-  await renderer.act(async () => {
+  await TestRenderer.act(async () => {
     explore.root.findByProps({ text: 'Retry' }).props.onSelect();
   });
-  await flush(renderer.act);
+  await flush();
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(homeRows(home)).toHaveLength(1);
   expect(explore.root.findAllByProps({ accessibilityLabel: 'Alpha' }).length).toBeGreaterThan(0);
-  await renderer.act(async () => {
+  await TestRenderer.act(async () => {
     home.unmount();
     explore.unmount();
   });
