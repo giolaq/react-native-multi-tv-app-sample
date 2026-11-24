@@ -13,7 +13,7 @@
     "lint": "expo lint",
     "prebuild": "EXPO_TV=1 expo prebuild --clean",
     "clean": "rm -rf node_modules",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
   },
   "//": "testPathIgnorePatterns: RemoteControlManager.android reads mock.calls at top level. AccessibilityProvider and FocusablePressable need complex native module mocking beyond Dimensions (AccessibilityInfo, react-tv-space-navigation).",
   "jest": {

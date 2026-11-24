@@ -1,0 +1,13 @@
+// Typecheck only: Metro and jest-expo apply tsconfig.json paths at runtime, and these point react at @types/react.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-native": ["./node_modules/react-native"],
+      "react-native/*": ["./node_modules/react-native/*"]
+    }
+  }
+}
