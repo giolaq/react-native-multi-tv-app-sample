@@ -1,5 +1,5 @@
-import type { CardData } from '../../../packages/shared-ui/src/data/moviesData';
-import { selectHomeRows } from '../../../packages/shared-ui/src/data/homeRows';
+import type { CardData } from '../moviesData';
+import { selectHomeRows } from '../homeRows';
 
 const card = (id: string, releaseYear: number | undefined, trending: boolean): CardData => ({
   id,
