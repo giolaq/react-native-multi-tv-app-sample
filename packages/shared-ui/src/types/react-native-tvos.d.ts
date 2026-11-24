@@ -27,7 +27,7 @@ declare module 'react-native' {
    */
   export class TVEventHandler {
     constructor();
-    enable(component: any, callback: (component: any, event: HWEvent) => void): void;
+    enable<T>(component: T, callback: (component: T, event: HWEvent) => void): void;
     disable(): void;
     static addListener(callback: (event: HWEvent) => void): EventSubscription;
   }

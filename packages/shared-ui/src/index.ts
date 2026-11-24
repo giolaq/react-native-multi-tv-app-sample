@@ -21,7 +21,6 @@ export { default as TVScreen } from './screens/TVScreen';
 export { default as SettingsScreen } from './screens/SettingsScreen';
 
 // Utils
-export { VideoHandler } from './utils/VideoHandler';
 export { isRTL, getOpenDrawerDirection, getCloseDrawerDirection } from './utils/rtl';
 
 // Navigation

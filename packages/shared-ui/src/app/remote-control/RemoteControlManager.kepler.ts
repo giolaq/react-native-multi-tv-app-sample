@@ -1,5 +1,5 @@
 import mitt from 'mitt';
-import type { HWEvent } from 'react-native';
+import { TVEventHandler, type HWEvent } from 'react-native';
 import { SupportedKeys } from './SupportedKeys';
 import { RemoteControlManagerInterface } from './RemoteControlManager.interface';
 import { logger } from '../../utils/logger';
@@ -24,18 +24,16 @@ const EVENT_TYPE_MAPPING: Record<string, SupportedKeys> = {
 
 class RemoteControlManager implements RemoteControlManagerInterface {
   private eventEmitter = mitt<{ keyDown: SupportedKeys }>();
-  private tvEventHandler: any;
+  private tvEventHandler: TVEventHandler;
 
   constructor() {
     // Initialize TVEventHandler for Vega/Kepler platform
-    // Import dynamically to avoid issues with types
-    const { TVEventHandler } = require('react-native');
     this.tvEventHandler = new TVEventHandler();
     this.tvEventHandler.enable(this, this.handleHWEvent);
     logger.debug('[RemoteControlManager.kepler] TVEventHandler enabled');
   }
 
-  private handleHWEvent = (_component: any, event: HWEvent): void => {
+  private handleHWEvent = (_component: unknown, event: HWEvent): void => {
     // Only handle KEY_DOWN events (eventKeyAction = 0)
     // eventKeyAction: 0 = KEY_DOWN, 1 = KEY_UP, -1 = default
     if (event.eventKeyAction === 0 || event.eventKeyAction === undefined) {

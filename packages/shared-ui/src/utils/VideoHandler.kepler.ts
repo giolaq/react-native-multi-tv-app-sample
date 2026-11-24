@@ -1,5 +1,5 @@
 import { IComponentInstance } from '@amazon-devices/react-native-kepler';
-import { VideoPlayer } from '@amazon-devices/react-native-w3cmedia';
+import { Event, VideoPlayer } from '@amazon-devices/react-native-w3cmedia';
 import React from 'react';
 import { Platform } from 'react-native';
 import { logger } from './logger';
@@ -10,6 +10,11 @@ const DEFAULT_ABR_HEIGHT: number = Platform.isTV ? 2160 : 1079;
 
 // Skip interval for seek operations (in seconds)
 const SKIP_INTERVAL_SECONDS = 10;
+
+declare global {
+  // eslint-disable-next-line no-var
+  var gmedia: VideoPlayer | null | undefined;
+}
 
 // Status types returned when deinitializing the media player
 type MediaPlayerDeInitStatus = 'success' | 'timedout' | 'invalid';
@@ -135,7 +140,7 @@ export class VideoHandler {
       logger.info('[VideoHandler] - preBufferVideo - Current video is null, create new Video Player');
       this.videoRef.current = new VideoPlayer();
     }
-    (global as any).gmedia = this.videoRef.current;
+    globalThis.gmedia = this.videoRef.current;
 
     // KMC (Kepler Media Controls) integration
     if (componentInstance) {
@@ -217,16 +222,15 @@ export class VideoHandler {
   /**
    * Handles video playback errors
    */
-  onError = (event: any) => {
+  onError = (event?: Event) => {
     if (!event?.target) {
       logger.error('[VideoHandler] - Invalid error event');
       this.setIsVideoError(true);
       return;
     }
 
-    const target = event.target;
-    const error = target.mediaControlStateUtil?.mError;
-    const errorMessage = error?.message_ || 'Unknown error';
+    const target = event.target as VideoPlayer;
+    const errorMessage = target.mediaControlStateUtil?.mError?.message || 'Unknown error';
 
     logger.error(
       '[VideoHandler] - Playback Error:\n' +
@@ -343,7 +347,7 @@ export class VideoHandler {
         }
 
         logger.debug('[VideoHandler] - Deinitialize sync completed successfully');
-        (global as any).gmedia = null;
+        globalThis.gmedia = null;
         this.videoRef.current = null;
       }
 

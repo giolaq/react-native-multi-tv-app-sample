@@ -16,9 +16,13 @@ import SettingsScreen from '../screens/SettingsScreen';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
-function DrawerSyncWrapper({ drawerNavRef }: { drawerNavRef: React.MutableRefObject<any> }) {
+function DrawerSyncWrapper({
+  drawerNavRef,
+}: {
+  drawerNavRef: React.MutableRefObject<NavigationProp<DrawerParamList> | null>;
+}) {
   const { isOpen: isMenuOpen } = useMenuContext();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<DrawerParamList>>();
 
   // Capture the drawer navigation object (useNavigation inside a Drawer.Screen gets the Drawer navigator)
   useEffect(() => {
@@ -41,55 +45,52 @@ export default function DrawerNavigator() {
   const drawerNavRef = useRef<NavigationProp<DrawerParamList> | null>(null);
 
   const navigationContent = (
-      <Drawer.Navigator
-        drawerContent={CustomDrawerContent}
-        initialRouteName="Home"
-        defaultStatus="open"
-        screenOptions={{
-          headerShown: false,
-          drawerActiveBackgroundColor: '#3498db',
-          drawerActiveTintColor: '#ffffff',
-          drawerInactiveTintColor: '#bdc3c7',
-          drawerStyle: styles.drawerStyle,
-          drawerLabelStyle: styles.drawerLabelStyle,
-          drawerType: 'front',
-          swipeEnabled: false,
-          drawerPosition: I18nManager.isRTL ? 'right' : 'left',
+    <Drawer.Navigator
+      drawerContent={CustomDrawerContent}
+      initialRouteName="Home"
+      defaultStatus="open"
+      screenOptions={{
+        headerShown: false,
+        drawerActiveBackgroundColor: '#3498db',
+        drawerActiveTintColor: '#ffffff',
+        drawerInactiveTintColor: '#bdc3c7',
+        drawerStyle: styles.drawerStyle,
+        drawerLabelStyle: styles.drawerLabelStyle,
+        drawerType: 'front',
+        swipeEnabled: false,
+        drawerPosition: I18nManager.isRTL ? 'right' : 'left',
+      }}
+    >
+      <Drawer.Screen name="Home" options={{ drawerLabel: 'Home' }}>
+        {() => (
+          <>
+            <DrawerSyncWrapper drawerNavRef={drawerNavRef} />
+            <HomeScreen />
+          </>
+        )}
+      </Drawer.Screen>
+      <Drawer.Screen
+        name="Explore"
+        component={ExploreScreen}
+        options={{
+          drawerLabel: 'Explore',
         }}
-      >
-        <Drawer.Screen
-          name="Home"
-          options={{ drawerLabel: 'Home' }}
-        >
-          {() => (
-            <>
-              <DrawerSyncWrapper drawerNavRef={drawerNavRef} />
-              <HomeScreen />
-            </>
-          )}
-        </Drawer.Screen>
-        <Drawer.Screen
-          name="Explore"
-          component={ExploreScreen}
-          options={{
-            drawerLabel: 'Explore',
-          }}
-        />
-        <Drawer.Screen
-          name="TV"
-          component={TVScreen}
-          options={{
-            drawerLabel: 'TV',
-          }}
-        />
-        <Drawer.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{
-            drawerLabel: 'Settings',
-          }}
-        />
-      </Drawer.Navigator>
+      />
+      <Drawer.Screen
+        name="TV"
+        component={TVScreen}
+        options={{
+          drawerLabel: 'TV',
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          drawerLabel: 'Settings',
+        }}
+      />
+    </Drawer.Navigator>
   );
 
   // On TV platforms, don't use GestureHandlerRootView as we use remote control navigation
@@ -98,22 +99,18 @@ export default function DrawerNavigator() {
   }
 
   // On mobile/web, use GestureHandlerRootView for swipe gestures
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      {navigationContent}
-    </GestureHandlerRootView>
-  );
+  return <GestureHandlerRootView style={{ flex: 1 }}>{navigationContent}</GestureHandlerRootView>;
 }
 
 const drawerStyles = StyleSheet.create({
-    drawerStyle: {
-      width: scaledPixels(300),
-      backgroundColor: '#2c3e50',
-      paddingTop: scaledPixels(0),
-    },
-    drawerLabelStyle: {
-      fontSize: scaledPixels(18),
-      fontWeight: 'bold',
-      marginStart: scaledPixels(10),
-    },
-  });
+  drawerStyle: {
+    width: scaledPixels(300),
+    backgroundColor: '#2c3e50',
+    paddingTop: scaledPixels(0),
+  },
+  drawerLabelStyle: {
+    fontSize: scaledPixels(18),
+    fontWeight: 'bold',
+    marginStart: scaledPixels(10),
+  },
+});
