@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 // Catalog API types
 export type CatalogItem = {
   id: string;
@@ -48,7 +49,7 @@ const CATALOG_URL = 'https://giolaq.github.io/scrap-tv-feed/catalog.json';
 
 // Transform catalog item to CardData format
 export const transformCatalogItem = (item: CatalogItem): CardData => {
-  const videoSource = item.sources.find(s => s.type === 'video/mp4') || item.sources[0];
+  const videoSource = item.sources.find((s) => s.type === 'video/mp4') || item.sources[0];
 
   return {
     id: item.id,
@@ -77,7 +78,7 @@ export const fetchMoviesData = async (): Promise<CardData[]> => {
     const data: CatalogResponse = await response.json();
     return data.items.map(transformCatalogItem);
   } catch (error) {
-    console.error('Failed to fetch movies catalog:', error);
+    logger.error('Failed to fetch movies catalog:', error);
     throw error;
   }
 };

@@ -5,6 +5,7 @@ import {
   KeplerCaptionsView,
   VideoPlayer as W3CVideoPlayer,
 } from '@amazon-devices/react-native-w3cmedia';
+import { logger } from '../../utils/logger';
 
 /**
  * VideoPlayer component for Vega/Kepler platform
@@ -88,7 +89,7 @@ const VideoPlayer = forwardRef<KeplerVideoRef, KeplerVideoPlayerProps>(
      */
     const handleSurfaceCreated = useCallback(
       (surfaceHandle: string) => {
-        console.info('[VideoPlayer.kepler] - Surface view created:', surfaceHandle);
+        logger.info('[VideoPlayer.kepler] - Surface view created:', surfaceHandle);
         onSurfaceViewCreated(surfaceHandle);
       },
       [onSurfaceViewCreated],
@@ -100,7 +101,7 @@ const VideoPlayer = forwardRef<KeplerVideoRef, KeplerVideoPlayerProps>(
      */
     const handleSurfaceDestroyed = useCallback(
       (surfaceHandle: string) => {
-        console.info('[VideoPlayer.kepler] - Surface view destroyed:', surfaceHandle);
+        logger.info('[VideoPlayer.kepler] - Surface view destroyed:', surfaceHandle);
         onSurfaceViewDestroyed(surfaceHandle);
       },
       [onSurfaceViewDestroyed],
@@ -112,7 +113,7 @@ const VideoPlayer = forwardRef<KeplerVideoRef, KeplerVideoPlayerProps>(
      */
     const handleCaptionCreated = useCallback(
       (captionHandle: string) => {
-        console.info('[VideoPlayer.kepler] - Caption view created:', captionHandle);
+        logger.info('[VideoPlayer.kepler] - Caption view created:', captionHandle);
         onCaptionViewCreated?.(captionHandle);
       },
       [onCaptionViewCreated],
@@ -124,7 +125,7 @@ const VideoPlayer = forwardRef<KeplerVideoRef, KeplerVideoPlayerProps>(
      */
     const handleCaptionDestroyed = useCallback(
       (captionHandle: string) => {
-        console.info('[VideoPlayer.kepler] - Caption view destroyed:', captionHandle);
+        logger.info('[VideoPlayer.kepler] - Caption view destroyed:', captionHandle);
         onCaptionViewDestroyed?.(captionHandle);
       },
       [onCaptionViewDestroyed],

@@ -7,6 +7,7 @@ import { GoBackConfiguration } from '../app/remote-control/GoBackConfiguration';
 import RootNavigator from './RootNavigator';
 
 import type { OverrideStore } from '../theme/overrideStore';
+import { logger } from '../utils/logger';
 
 export interface AppNavigatorProps {
   fontsLoaded?: boolean;
@@ -21,7 +22,7 @@ export default function AppNavigator({ fontsLoaded = true, onReady, accessibilit
       try {
         require('../app/configureRemoteControl');
       } catch (error) {
-        console.warn('Remote control configuration not available:', error);
+        logger.error('Remote control configuration not available:', error);
       }
     }
   }, []);

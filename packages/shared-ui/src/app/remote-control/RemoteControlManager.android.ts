@@ -2,6 +2,7 @@ import mitt from 'mitt';
 import KeyEvent from 'react-native-keyevent';
 import { SupportedKeys } from './SupportedKeys';
 import { RemoteControlManagerInterface } from './RemoteControlManager.interface';
+import { logger } from '../../utils/logger';
 
 const KEY_CODE_MAPPING: Record<number, SupportedKeys> = {
   21: SupportedKeys.Left,
@@ -26,20 +27,20 @@ class RemoteControlManager implements RemoteControlManagerInterface {
   private handleKeyDown = (keyEvent: { keyCode: number }): void => {
     const mappedKey = KEY_CODE_MAPPING[keyEvent.keyCode];
     if (mappedKey) {
-      console.log(`Key pressed: ${mappedKey}`);
+      logger.debug(`Key pressed: ${mappedKey}`);
       this.eventEmitter.emit('keyDown', mappedKey);
     }
   };
 
   addKeydownListener = (listener: (event: SupportedKeys) => void): ((event: SupportedKeys) => void) => {
     this.eventEmitter.on('keyDown', listener);
-    console.log('Key listener added');
+    logger.debug('Key listener added');
     return listener;
   };
 
   removeKeydownListener = (listener: (event: SupportedKeys) => void): void => {
     this.eventEmitter.off('keyDown', listener);
-    console.log('Key listener removed');
+    logger.debug('Key listener removed');
   };
 
   emitKeyDown = (key: SupportedKeys): void => {

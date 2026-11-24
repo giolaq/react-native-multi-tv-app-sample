@@ -2,6 +2,7 @@ import { IComponentInstance } from '@amazon-devices/react-native-kepler';
 import { VideoPlayer } from '@amazon-devices/react-native-w3cmedia';
 import React from 'react';
 import { Platform } from 'react-native';
+import { logger } from './logger';
 
 // Default video resolution settings based on platform (TV vs mobile/web)
 const DEFAULT_ABR_WIDTH: number = Platform.isTV ? 3840 : 1919;
@@ -128,14 +129,10 @@ export class VideoHandler {
    */
   preBufferVideo = async (componentInstance?: IComponentInstance) => {
     await this.destroyVideoElements();
-    console.info(
-      '[VideoHandler] - preBufferVideo - Attempt to prebuffer Video Player',
-    );
+    logger.info('[VideoHandler] - preBufferVideo - Attempt to prebuffer Video Player');
 
     if (this.videoRef.current == null) {
-      console.info(
-        '[VideoHandler] - preBufferVideo - Current video is null, create new Video Player',
-      );
+      logger.info('[VideoHandler] - preBufferVideo - Current video is null, create new Video Player');
       this.videoRef.current = new VideoPlayer();
     }
     (global as any).gmedia = this.videoRef.current;
@@ -143,19 +140,14 @@ export class VideoHandler {
     // KMC (Kepler Media Controls) integration
     if (componentInstance) {
       try {
-        console.info(
-          '[VideoHandler] - preBufferVideo - KMC: set Media Control Focus',
-        );
+        logger.info('[VideoHandler] - preBufferVideo - KMC: set Media Control Focus');
         const { AppOverrideMediaControlHandler } = await import('./AppOverrideMediaControlHandler.kepler');
         await this.videoRef.current.setMediaControlFocus(
           componentInstance,
-          new AppOverrideMediaControlHandler(
-            this.videoRef.current as VideoPlayer,
-            false,
-          ),
+          new AppOverrideMediaControlHandler(this.videoRef.current as VideoPlayer, false),
         );
       } catch (error) {
-        console.error('[VideoHandler] - Error during KMC execution', error);
+        logger.error('[VideoHandler] - Error during KMC execution', error);
       }
     }
 
@@ -163,14 +155,14 @@ export class VideoHandler {
     this.videoRef.current
       .initialize()
       .then(() => {
-        console.log('[VideoHandler] - Video Player Initialized');
+        logger.debug('[VideoHandler] - Video Player Initialized');
         this.setupEventListeners();
         this.videoRef!!.current!!.autoplay = false;
         this.loadVideoElements();
       })
       .catch((error) => {
-        console.error('[VideoHandler] - Failed to initialize Video');
-        console.error(error);
+        logger.error('[VideoHandler] - Failed to initialize Video');
+        logger.error(error);
         this.setIsVideoError(true);
       });
   };
@@ -191,17 +183,10 @@ export class VideoHandler {
   /**
    * Loads static media content (MP4 files)
    */
-  loadStaticMediaPlayer = (video: {
-    src: string;
-    autoplay: boolean;
-    pause: () => void;
-    load: () => void;
-  }) => {
+  loadStaticMediaPlayer = (video: { src: string; autoplay: boolean; pause: () => void; load: () => void }) => {
     video.src = this.videoUri;
     video.pause();
-    console.log(
-      `[VideoHandler] - loadStaticMediaPlayer - Loading with: ${video.src}`,
-    );
+    logger.debug(`[VideoHandler] - loadStaticMediaPlayer - Loading with: ${video.src}`);
     video.load();
   };
 
@@ -212,7 +197,7 @@ export class VideoHandler {
    */
   onLoadedMetadata = () => {
     if (this.videoRef.current) {
-      console.log('[VideoHandler] - onLoadedMetadata');
+      logger.debug('[VideoHandler] - onLoadedMetadata');
       const duration = this.videoRef.current.duration || 0;
       this.setDuration(duration);
       this.setIsVideoInitialized(true);
@@ -224,7 +209,7 @@ export class VideoHandler {
    */
   onEnded = () => {
     if (this.videoRef.current?.ended) {
-      console.log('[VideoHandler] - onEnded');
+      logger.debug('[VideoHandler] - onEnded');
       this.setIsVideoEnded(true);
     }
   };
@@ -234,7 +219,7 @@ export class VideoHandler {
    */
   onError = (event: any) => {
     if (!event?.target) {
-      console.error('[VideoHandler] - Invalid error event');
+      logger.error('[VideoHandler] - Invalid error event');
       this.setIsVideoError(true);
       return;
     }
@@ -243,7 +228,7 @@ export class VideoHandler {
     const error = target.mediaControlStateUtil?.mError;
     const errorMessage = error?.message_ || 'Unknown error';
 
-    console.error(
+    logger.error(
       '[VideoHandler] - Playback Error:\n' +
         `Format: ${this.selectedFileType}\n` +
         `URI: ${this.videoUri}\n` +
@@ -271,7 +256,7 @@ export class VideoHandler {
    * Handles the 'waiting' event - shows buffering indicator
    */
   onWaiting = () => {
-    console.log('[VideoHandler] - onWaiting');
+    logger.debug('[VideoHandler] - onWaiting');
     this.setShowBuffering(true);
   };
 
@@ -279,7 +264,7 @@ export class VideoHandler {
    * Handles the 'seeking' event - shows buffering indicator
    */
   onSeeking = () => {
-    console.log('[VideoHandler] - onSeeking');
+    logger.debug('[VideoHandler] - onSeeking');
     this.setShowBuffering(true);
   };
 
@@ -287,7 +272,7 @@ export class VideoHandler {
    * Handles the 'seeked' event - hides buffering indicator
    */
   onSeeked = () => {
-    console.log('[VideoHandler] - onSeeked');
+    logger.debug('[VideoHandler] - onSeeked');
     this.setShowBuffering(false);
   };
 
@@ -295,7 +280,7 @@ export class VideoHandler {
    * Handles the 'playing' event - hides buffering indicator
    */
   onPlaying = () => {
-    console.log('[VideoHandler] - onPlaying');
+    logger.debug('[VideoHandler] - onPlaying');
     this.setShowBuffering(false);
   };
 
@@ -305,10 +290,7 @@ export class VideoHandler {
    * Sets up all video event listeners
    */
   setupEventListeners = () => {
-    this.videoRef.current?.addEventListener(
-      'loadedmetadata',
-      this.onLoadedMetadata,
-    );
+    this.videoRef.current?.addEventListener('loadedmetadata', this.onLoadedMetadata);
     this.videoRef.current?.addEventListener('timeupdate', this.onTimeUpdate);
     this.videoRef.current?.addEventListener('ended', this.onEnded);
     this.videoRef.current?.addEventListener('error', this.onError);
@@ -322,10 +304,7 @@ export class VideoHandler {
    * Removes all video event listeners
    */
   removeEventListeners = () => {
-    this.videoRef.current?.removeEventListener(
-      'loadedmetadata',
-      this.onLoadedMetadata,
-    );
+    this.videoRef.current?.removeEventListener('loadedmetadata', this.onLoadedMetadata);
     this.videoRef.current?.removeEventListener('timeupdate', this.onTimeUpdate);
     this.videoRef.current?.removeEventListener('ended', this.onEnded);
     this.videoRef.current?.removeEventListener('error', this.onError);
@@ -341,12 +320,12 @@ export class VideoHandler {
    * Synchronously destroys the media player and cleans up resources
    */
   destroyMediaPlayerSync = (timeout: number = 1500): boolean => {
-    console.log('[VideoHandler] - Starting synchronous media player destruction');
+    logger.debug('[VideoHandler] - Starting synchronous media player destruction');
 
     try {
       // Pause current playback
       if (this.videoRef.current) {
-        console.log('[VideoHandler] - Pausing media');
+        logger.debug('[VideoHandler] - Pausing media');
         this.videoRef.current.pause();
       }
 
@@ -355,24 +334,23 @@ export class VideoHandler {
 
       // Deinitialize the main video player
       if (this.videoRef.current) {
-        console.log('[VideoHandler] - Deinitializing media synchronously');
-        const result: MediaPlayerDeInitStatus =
-          this.videoRef.current.deinitializeSync(timeout);
+        logger.debug('[VideoHandler] - Deinitializing media synchronously');
+        const result: MediaPlayerDeInitStatus = this.videoRef.current.deinitializeSync(timeout);
 
         if (result !== 'success') {
-          console.error(`[VideoHandler] - Deinitialize sync failed - ${result}`);
+          logger.error(`[VideoHandler] - Deinitialize sync failed - ${result}`);
           return false;
         }
 
-        console.log('[VideoHandler] - Deinitialize sync completed successfully');
+        logger.debug('[VideoHandler] - Deinitialize sync completed successfully');
         (global as any).gmedia = null;
         this.videoRef.current = null;
       }
 
-      console.log('[VideoHandler] - Sync destruction completed');
+      logger.debug('[VideoHandler] - Sync destruction completed');
       return true;
     } catch (err) {
-      console.error('[VideoHandler] - Error during destruction: ', err);
+      logger.error('[VideoHandler] - Error during destruction: ', err);
       return false;
     }
   };
@@ -382,11 +360,11 @@ export class VideoHandler {
    */
   destroyVideoElements = (): boolean => {
     if (!this.videoRef.current) {
-      console.log('[VideoHandler] - No video reference to destroy');
+      logger.debug('[VideoHandler] - No video reference to destroy');
       return false;
     }
 
-    console.log('[VideoHandler] - Triggering synchronous video elements destruction');
+    logger.debug('[VideoHandler] - Triggering synchronous video elements destruction');
     return this.destroyMediaPlayerSync();
   };
 
@@ -395,7 +373,7 @@ export class VideoHandler {
    */
   play = () => {
     if (this.videoRef.current) {
-      console.log('[VideoHandler] - Play');
+      logger.debug('[VideoHandler] - Play');
       this.videoRef.current.play();
     }
   };
@@ -405,7 +383,7 @@ export class VideoHandler {
    */
   pause = () => {
     if (this.videoRef.current) {
-      console.log('[VideoHandler] - Pause');
+      logger.debug('[VideoHandler] - Pause');
       this.videoRef.current.pause();
     }
   };
@@ -415,7 +393,7 @@ export class VideoHandler {
    */
   seek = (time: number) => {
     if (this.videoRef.current) {
-      console.log(`[VideoHandler] - Seek to ${time}`);
+      logger.debug(`[VideoHandler] - Seek to ${time}`);
       this.videoRef.current.currentTime = time;
     }
   };

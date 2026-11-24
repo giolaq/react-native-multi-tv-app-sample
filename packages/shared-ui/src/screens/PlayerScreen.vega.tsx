@@ -4,10 +4,7 @@ import { SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  IKeplerAppStateManager,
-  useKeplerAppStateManager,
-} from '@amazon-devices/react-native-kepler';
+import { IKeplerAppStateManager, useKeplerAppStateManager } from '@amazon-devices/react-native-kepler';
 import { VideoPlayer as W3CVideoPlayer } from '@amazon-devices/react-native-w3cmedia';
 import RemoteControlManager from '../app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../app/remote-control/SupportedKeys';
@@ -16,12 +13,10 @@ import ExitButton from '../components/player/ExitButton';
 import VideoPlayer from '../components/player/VideoPlayer.vega';
 import { RootStackParamList } from '../navigation/types';
 import { VideoHandler } from '../utils/VideoHandler.kepler';
+import { logger } from '../utils/logger';
 
 type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
-type PlayerScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Player'
->;
+type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Player'>;
 
 /**
  * PlayerScreen for Vega/Kepler Platform
@@ -43,8 +38,7 @@ export default function PlayerScreen() {
   const isFocused = useIsFocused();
 
   // Kepler-specific hooks
-  const keplerAppStateManager: IKeplerAppStateManager =
-    useKeplerAppStateManager();
+  const keplerAppStateManager: IKeplerAppStateManager = useKeplerAppStateManager();
   const componentInstance = keplerAppStateManager.getComponentInstance();
 
   // Video state
@@ -92,19 +86,22 @@ export default function PlayerScreen() {
   /**
    * Seek to a specific time
    */
-  const seek = useCallback((time: number) => {
-    if (videoHandlerRef.current && durationRef.current) {
-      try {
-        const clampedTime = Math.max(0, Math.min(time, durationRef.current));
-        videoHandlerRef.current.seek(clampedTime);
-        setCurrentTime(clampedTime);
-        currentTimeRef.current = clampedTime;
-        showControls();
-      } catch (e) {
-        console.warn('[PlayerScreen.kepler] Seek error:', e);
+  const seek = useCallback(
+    (time: number) => {
+      if (videoHandlerRef.current && durationRef.current) {
+        try {
+          const clampedTime = Math.max(0, Math.min(time, durationRef.current));
+          videoHandlerRef.current.seek(clampedTime);
+          setCurrentTime(clampedTime);
+          currentTimeRef.current = clampedTime;
+          showControls();
+        } catch (e) {
+          logger.error('[PlayerScreen.kepler] Seek error:', e);
+        }
       }
-    }
-  }, [showControls]);
+    },
+    [showControls],
+  );
 
   /**
    * Toggle play/pause
@@ -121,7 +118,7 @@ export default function PlayerScreen() {
         }
         showControls();
       } catch (e) {
-        console.warn('[PlayerScreen.kepler] Play/pause error:', e);
+        logger.error('[PlayerScreen.kepler] Play/pause error:', e);
       }
     }
   }, [showControls]);
@@ -130,7 +127,7 @@ export default function PlayerScreen() {
    * Navigate back with cleanup
    */
   const navigateBack = useCallback(() => {
-    console.log('[PlayerScreen.kepler] - Navigating back');
+    logger.debug('[PlayerScreen.kepler] - Navigating back');
 
     // Clear surface and caption handles
     if (surfaceHandleRef.current && videoRef.current) {
@@ -156,7 +153,7 @@ export default function PlayerScreen() {
   useEffect(() => {
     if (!isFocused) return;
 
-    console.log('[PlayerScreen.kepler] - Initializing video handler');
+    logger.debug('[PlayerScreen.kepler] - Initializing video handler');
 
     // Create video handler
     videoHandlerRef.current = new VideoHandler(
@@ -176,7 +173,7 @@ export default function PlayerScreen() {
 
     return () => {
       // Cleanup on unmount
-      console.log('[PlayerScreen.kepler] - Cleaning up video handler');
+      logger.debug('[PlayerScreen.kepler] - Cleaning up video handler');
       if (surfaceHandleRef.current && videoRef.current) {
         videoRef.current.clearSurfaceHandle(surfaceHandleRef.current);
       }
@@ -235,20 +232,17 @@ export default function PlayerScreen() {
             break;
         }
       } catch (e) {
-        console.error('[PlayerScreen.kepler] Key handler error:', e);
+        logger.error('[PlayerScreen.kepler] Key handler error:', e);
       }
     };
 
     const listener = RemoteControlManager.addKeydownListener(handleKeyDown);
 
     // Setup hardware back button listener
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        navigateBack();
-        return true;
-      },
-    );
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigateBack();
+      return true;
+    });
 
     return () => {
       RemoteControlManager.removeKeydownListener(listener);
@@ -260,7 +254,7 @@ export default function PlayerScreen() {
    * Handle surface view creation
    */
   const onSurfaceViewCreated = useCallback((surfaceHandle: string) => {
-    console.log('[PlayerScreen.kepler] - Surface view created:', surfaceHandle);
+    logger.debug('[PlayerScreen.kepler] - Surface view created:', surfaceHandle);
     surfaceHandleRef.current = surfaceHandle;
 
     // Set surface handle on video player
@@ -276,10 +270,7 @@ export default function PlayerScreen() {
    * Handle surface view destruction
    */
   const onSurfaceViewDestroyed = useCallback((surfaceHandle: string) => {
-    console.log(
-      '[PlayerScreen.kepler] - Surface view destroyed:',
-      surfaceHandle,
-    );
+    logger.debug('[PlayerScreen.kepler] - Surface view destroyed:', surfaceHandle);
     if (videoRef.current) {
       videoRef.current.clearSurfaceHandle(surfaceHandle);
     }
@@ -290,7 +281,7 @@ export default function PlayerScreen() {
    * Handle caption view creation
    */
   const onCaptionViewCreated = useCallback((captionHandle: string) => {
-    console.log('[PlayerScreen.kepler] - Caption view created:', captionHandle);
+    logger.debug('[PlayerScreen.kepler] - Caption view created:', captionHandle);
     captionViewHandleRef.current = captionHandle;
 
     if (videoRef.current) {
@@ -302,10 +293,7 @@ export default function PlayerScreen() {
    * Handle caption view destruction
    */
   const onCaptionViewDestroyed = useCallback((captionHandle: string) => {
-    console.log(
-      '[PlayerScreen.kepler] - Caption view destroyed:',
-      captionHandle,
-    );
+    logger.debug('[PlayerScreen.kepler] - Caption view destroyed:', captionHandle);
     if (videoRef.current) {
       videoRef.current.clearCaptionViewHandle(captionHandle);
     }
