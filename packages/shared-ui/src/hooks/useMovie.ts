@@ -8,7 +8,6 @@ export type MovieLookup =
   | { status: 'missing' }
   | { status: 'found'; movie: CardData };
 
-// A deep link carries the id as a string, while the catalog may hold a number.
 const sameId = (a: CardData['id'], b: CardData['id']) => String(a) === String(b);
 
 export function useMovie(id: CardData['id']): MovieLookup {

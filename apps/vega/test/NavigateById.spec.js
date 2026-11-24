@@ -38,7 +38,6 @@ jest.mock(
   }),
   {virtual: true},
 );
-// Shared UI resolves its own copy of the Kepler package.
 jest.mock(
   '../../../packages/shared-ui/node_modules/@amazon-devices/react-native-kepler',
   () => ({
