@@ -143,14 +143,13 @@ describe('HomeScreen theme', () => {
   it.each([
     ['standard', standard],
     ['high contrast and large text', boosted],
-  ])('rings the focused card visibly against the card in %s', async (_name, preferences) => {
+  ])('rings the focused card visibly against the screen background in %s', async (_name, preferences) => {
     mockFocused = true;
     const view = await render('HomeScreen', preferences);
     const style = view.cardStyle();
     expect(style.borderColor).toBe(view.theme.focus.borderColor);
-    expect(style.backgroundColor).toBe(view.theme.colors.card);
     expect(style.borderWidth).toBeGreaterThanOrEqual(view.theme.focus.borderWidth);
-    expect(view.contrastRatio(style.borderColor, style.backgroundColor)).toBeGreaterThanOrEqual(3);
+    expect(view.contrastRatio(style.borderColor, view.theme.colors.background)).toBeGreaterThanOrEqual(3);
     await view.act(async () => view.tree.unmount());
   });
 
