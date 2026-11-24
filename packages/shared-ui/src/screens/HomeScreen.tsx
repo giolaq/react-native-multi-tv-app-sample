@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { DrawerActions, useIsFocused } from '@react-navigation/native';
 import { useMenuContext } from '../components/MenuContext';
 import {
@@ -10,13 +10,13 @@ import {
   SpatialNavigationScrollView,
   SpatialNavigationNode,
   SpatialNavigationVirtualizedList,
-  SpatialNavigationVirtualizedListRef,
   DefaultFocus,
 } from 'react-tv-space-navigation';
 import { Direction } from '@bam.tech/lrud';
 import { scaledPixels } from '../hooks/useScale';
 import { RootStackParamList } from '../navigation/types';
 import { CardData } from '../data/moviesData';
+import { selectHomeRows } from '../data/homeRows';
 import { Catalog, useCatalog } from '../hooks/useCatalog';
 import FocusablePressable from '../components/FocusablePressable';
 import { colors, safeZones } from '../theme';
@@ -47,16 +47,13 @@ const MovieItem = React.memo(
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
-  const trendingRef = useRef<SpatialNavigationVirtualizedListRef>(null);
-  const classicsRef = useRef<SpatialNavigationVirtualizedListRef>(null);
-  const hipAndModernRef = useRef<SpatialNavigationVirtualizedListRef>(null);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedCard, setFocusedCard] = useState<{ item: CardData; indexInRow: number } | null>(null);
   const catalog = useCatalog();
-  const moviesData = useMemo(() => (catalog.status === 'loaded' ? catalog.items : []), [catalog]);
+  const rows = useMemo(() => (catalog.status === 'loaded' ? selectHomeRows(catalog.items) : []), [catalog]);
   const isFocused = useIsFocused();
   const isActive = isFocused && !isMenuOpen;
 
-  const focusedItem = useMemo(() => moviesData[focusedIndex] || null, [focusedIndex, moviesData]);
+  const focusedItem = focusedCard?.item ?? rows[0]?.items[0] ?? null;
 
   // Memoize header image source to prevent unnecessary re-renders
   const headerImageSource = useMemo(
@@ -89,12 +86,12 @@ export default function HomeScreen() {
 
   const onDirectionHandledWithoutMovement = useCallback(
     (movement: Direction) => {
-      if (movement === getOpenDrawerDirection() && focusedIndex === 0) {
+      if (movement === getOpenDrawerDirection() && (focusedCard?.indexInRow ?? 0) === 0) {
         navigation.dispatch(DrawerActions.openDrawer());
         toggleMenu(true);
       }
     },
-    [toggleMenu, focusedIndex, navigation],
+    [toggleMenu, focusedCard, navigation],
   );
 
   const renderItem = useCallback(
@@ -115,7 +112,7 @@ export default function HomeScreen() {
             duration: item.duration,
           });
         }}
-        onFocus={() => setFocusedIndex(index)}
+        onFocus={() => setFocusedCard({ item, indexInRow: index })}
       >
         {({ isFocused }) => <MovieItem item={item} isFocused={isFocused} styles={gridStyles} />}
       </SpatialNavigationFocusableView>
@@ -123,40 +120,31 @@ export default function HomeScreen() {
     [navigation],
   );
 
-  const renderScrollableRow = useCallback(
-    (title: string, _ref: React.RefObject<SpatialNavigationVirtualizedListRef | null>) => {
-      return (
-        <View style={gridStyles.highlightsContainer}>
-          <Text style={gridStyles.highlightsTitle}>{title}</Text>
-          <SpatialNavigationNode>
-            <DefaultFocus>
-              <SpatialNavigationVirtualizedList
-                data={moviesData}
-                orientation="horizontal"
-                renderItem={renderItem}
-                itemSize={scaledPixels(440)}
-                onEndReachedThresholdItemsNumber={3}
-              />
-            </DefaultFocus>
-          </SpatialNavigationNode>
-        </View>
-      );
-    },
-    [moviesData, renderItem],
-  );
-
   return (
     <SpatialNavigationRoot isActive={isActive} onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
       <View style={gridStyles.container}>
-        {moviesData.length === 0 ? (
+        {rows.length === 0 ? (
           <CatalogStatus catalog={catalog} />
         ) : (
           <>
             {renderHeader()}
             <SpatialNavigationScrollView offsetFromStart={scaledPixels(60)} style={gridStyles.scrollContent}>
-              {renderScrollableRow('Trending Movies', trendingRef)}
-              {renderScrollableRow('Classics', classicsRef)}
-              {renderScrollableRow('Hip and Modern', hipAndModernRef)}
+              {rows.map((row) => (
+                <View key={row.key} style={gridStyles.highlightsContainer}>
+                  <Text style={gridStyles.highlightsTitle}>{row.title}</Text>
+                  <SpatialNavigationNode>
+                    <DefaultFocus>
+                      <SpatialNavigationVirtualizedList
+                        data={row.items}
+                        orientation="horizontal"
+                        renderItem={renderItem}
+                        itemSize={scaledPixels(440)}
+                        onEndReachedThresholdItemsNumber={3}
+                      />
+                    </DefaultFocus>
+                  </SpatialNavigationNode>
+                </View>
+              ))}
             </SpatialNavigationScrollView>
           </>
         )}
