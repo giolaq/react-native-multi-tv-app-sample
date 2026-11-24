@@ -17,7 +17,8 @@ import { Direction } from '@bam.tech/lrud';
 import { scaledPixels } from '../hooks/useScale';
 import { RootStackParamList } from '../navigation/types';
 import { CardData } from '../data/moviesData';
-import { useCatalog } from '../hooks/useCatalog';
+import { Catalog, useCatalog } from '../hooks/useCatalog';
+import FocusablePressable from '../components/FocusablePressable';
 import { colors, safeZones } from '../theme';
 import PlatformLinearGradient from '../components/PlatformLinearGradient';
 import { getOpenDrawerDirection } from '../utils/rtl';
@@ -144,28 +145,44 @@ export default function HomeScreen() {
     [moviesData, renderItem],
   );
 
-  // Show loading state while fetching data
-  if (moviesData.length === 0) {
-    return (
-      <View style={gridStyles.container}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.text, fontSize: scaledPixels(24) }}>Loading movies...</Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <SpatialNavigationRoot isActive={isActive} onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
       <View style={gridStyles.container}>
-        {renderHeader()}
-        <SpatialNavigationScrollView offsetFromStart={scaledPixels(60)} style={gridStyles.scrollContent}>
-          {renderScrollableRow('Trending Movies', trendingRef)}
-          {renderScrollableRow('Classics', classicsRef)}
-          {renderScrollableRow('Hip and Modern', hipAndModernRef)}
-        </SpatialNavigationScrollView>
+        {moviesData.length === 0 ? (
+          <CatalogStatus catalog={catalog} />
+        ) : (
+          <>
+            {renderHeader()}
+            <SpatialNavigationScrollView offsetFromStart={scaledPixels(60)} style={gridStyles.scrollContent}>
+              {renderScrollableRow('Trending Movies', trendingRef)}
+              {renderScrollableRow('Classics', classicsRef)}
+              {renderScrollableRow('Hip and Modern', hipAndModernRef)}
+            </SpatialNavigationScrollView>
+          </>
+        )}
       </View>
     </SpatialNavigationRoot>
+  );
+}
+
+const statusMessages: Record<Catalog['status'], string> = {
+  loading: 'Loading movies...',
+  failed: 'Unable to load movies.',
+  loaded: 'No movies are available.',
+};
+
+function CatalogStatus({ catalog }: { catalog: Catalog }) {
+  return (
+    <View style={gridStyles.status}>
+      <Text accessibilityLiveRegion="polite" style={gridStyles.statusText}>
+        {statusMessages[catalog.status]}
+      </Text>
+      {catalog.status === 'failed' ? (
+        <DefaultFocus>
+          <FocusablePressable text="Retry" onSelect={catalog.retry} />
+        </DefaultFocus>
+      ) : null}
+    </View>
   );
 }
 
@@ -173,6 +190,16 @@ const gridStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  status: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: scaledPixels(24),
+  },
+  statusText: {
+    color: colors.text,
+    fontSize: scaledPixels(24),
   },
   scrollContent: {
     flex: 1,

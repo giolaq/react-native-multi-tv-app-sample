@@ -128,7 +128,7 @@ it('reports a failed load on Explore and fetches again only when Retry is select
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(explore.root.findAllByProps({ children: 'Unable to load the catalog.' }).length).toBeGreaterThan(0);
-  expect(home.root.findAllByProps({ children: 'Loading movies...' }).length).toBeGreaterThan(0);
+  expect(home.root.findAllByProps({ children: 'Unable to load movies.' }).length).toBeGreaterThan(0);
 
   await TestRenderer.act(async () => {
     explore.root.findByProps({ text: 'Retry' }).props.onSelect();
