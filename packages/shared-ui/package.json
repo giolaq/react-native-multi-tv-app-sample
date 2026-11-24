@@ -7,8 +7,32 @@
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "clean": "rm -rf node_modules"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "./jest-setup.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*-test.ts?(x)"
+    ],
+    "transform": {
+      "\\.[jt]sx?$": [
+        "babel-jest",
+        {
+          "configFile": false,
+          "babelrc": false,
+          "presets": [
+            "@babel/preset-typescript"
+          ],
+          "plugins": [
+            "@babel/plugin-transform-modules-commonjs"
+          ]
+        }
+      ]
+    }
   },
   "peerDependencies": {
     "@react-navigation/native": "*",
