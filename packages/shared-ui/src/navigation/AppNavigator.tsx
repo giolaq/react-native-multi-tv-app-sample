@@ -22,7 +22,7 @@ export default function AppNavigator({ fontsLoaded = true, onReady, accessibilit
       try {
         require('../app/configureRemoteControl');
       } catch (error) {
-        logger.warn('Remote control configuration not available:', error);
+        logger.error('Remote control configuration not available:', error);
       }
     }
   }, []);
