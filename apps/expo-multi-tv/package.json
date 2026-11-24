@@ -31,7 +31,7 @@
       "<rootDir>/node_modules"
     ],
     "moduleNameMapper": {
-      "^(react|react-native|react-native-keyevent|react-tv-space-navigation|@react-navigation/native|react-native-video)$": "<rootDir>/node_modules/$1"
+      "^(react|react-native|react-native-keyevent|react-tv-space-navigation|@react-navigation/native|@react-navigation/drawer|react-native-video)$": "<rootDir>/node_modules/$1"
     }
   },
   "dependencies": {

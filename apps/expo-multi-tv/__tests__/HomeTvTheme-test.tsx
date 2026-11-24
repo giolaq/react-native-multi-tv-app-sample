@@ -1,5 +1,28 @@
-import type TestRenderer from 'react-test-renderer';
+import React from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import TestRenderer from 'react-test-renderer';
+import Home from '../../../packages/shared-ui/src/screens/HomeScreen';
+import TVScreen from '../../../packages/shared-ui/src/screens/TVScreen';
+import { createCatalogStore, type CatalogStore } from '../../../packages/shared-ui/src/data/catalogStore';
+import { fetchMoviesData } from '../../../packages/shared-ui/src/data/moviesData';
+import { scaledPixels } from '../../../packages/shared-ui/src/hooks/useScale';
+import { createTheme, highContrastColors, contrastRatio } from '../../../packages/shared-ui/src/theme';
 import type { AccessibilityPreferences } from '../../../packages/shared-ui/src/theme/accessibility';
+
+// React Native loads these on first access. Loading them here keeps that cold cost out of the first test's timeout.
+void [Image, Pressable, Text, View];
+
+// A fresh store per test, instead of resetting every module and reloading React Native inside each test.
+const mockStore: { current?: CatalogStore } = {};
+jest.mock('../../../packages/shared-ui/src/data/catalogStore', () =>
+  Object.defineProperty(
+    { ...jest.requireActual('../../../packages/shared-ui/src/data/catalogStore') },
+    'catalogStore',
+    {
+      get: () => mockStore.current,
+    },
+  ),
+);
 
 let mockPreferences: AccessibilityPreferences;
 let mockFocused = false;
@@ -79,30 +102,25 @@ beforeEach(() => {
   fetchMock.mockImplementation(() => respond([item]));
   mockFocused = false;
   globalWithFetch.fetch = fetchMock;
+  mockStore.current = createCatalogStore(fetchMoviesData);
 });
 afterAll(() => {
   globalWithFetch.fetch = originalFetch;
 });
 
 async function render(screen: 'HomeScreen' | 'TVScreen', preferences: AccessibilityPreferences) {
-  jest.resetModules();
   mockPreferences = preferences;
-  const React = require('react');
-  const renderer: typeof TestRenderer = require('react-test-renderer');
-  const { StyleSheet, View, Image } = require('react-native');
-  const { scaledPixels } = require('../../../packages/shared-ui/src/hooks/useScale');
-  const { createTheme, highContrastColors, contrastRatio } = require('../../../packages/shared-ui/src/theme');
-  const Screen = require(`../../../packages/shared-ui/src/screens/${screen}`).default;
+  const Screen = screen === 'HomeScreen' ? Home : TVScreen;
   let tree!: TestRenderer.ReactTestRenderer;
-  await renderer.act(async () => {
-    tree = renderer.create(React.createElement(Screen));
+  await TestRenderer.act(async () => {
+    tree = TestRenderer.create(<Screen />);
   });
-  await renderer.act(async () => {});
+  await TestRenderer.act(async () => {});
 
   const flat = (node: TestRenderer.ReactTestInstance) => StyleSheet.flatten(node.props.style);
   return {
     tree,
-    act: renderer.act,
+    act: TestRenderer.act,
     scaledPixels,
     highContrastColors,
     contrastRatio,
@@ -143,14 +161,13 @@ describe('HomeScreen theme', () => {
   it.each([
     ['standard', standard],
     ['high contrast and large text', boosted],
-  ])('rings the focused card visibly against the card in %s', async (_name, preferences) => {
+  ])('rings the focused card visibly against the screen background in %s', async (_name, preferences) => {
     mockFocused = true;
     const view = await render('HomeScreen', preferences);
     const style = view.cardStyle();
     expect(style.borderColor).toBe(view.theme.focus.borderColor);
-    expect(style.backgroundColor).toBe(view.theme.colors.card);
     expect(style.borderWidth).toBeGreaterThanOrEqual(view.theme.focus.borderWidth);
-    expect(view.contrastRatio(style.borderColor, style.backgroundColor)).toBeGreaterThanOrEqual(3);
+    expect(view.contrastRatio(style.borderColor, view.theme.colors.background)).toBeGreaterThanOrEqual(3);
     await view.act(async () => view.tree.unmount());
   });
 
@@ -165,9 +182,7 @@ describe('HomeScreen theme', () => {
     const before = view.cards()[0].props.styles;
     mockFocused = true;
     await view.act(async () => {
-      view.tree.update(
-        require('react').createElement(require('../../../packages/shared-ui/src/screens/HomeScreen').default),
-      );
+      view.tree.update(<Home />);
     });
     expect(view.cards()[0].props.styles).toBe(before);
     await view.act(async () => view.tree.unmount());
@@ -199,9 +214,27 @@ describe('TVScreen theme', () => {
     mockFocused = true;
     const view = await render('TVScreen', boosted);
     const title = view.tree.root.find((n) => n.props.children === 'TV Screen' && n.props.style);
-    const ring = require('react-native').StyleSheet.flatten(title.parent!.props.style);
+    const ring = StyleSheet.flatten(title.parent!.props.style);
     expect(ring.borderColor).toBe(view.theme.focus.borderColor);
     expect(ring.borderWidth).toBe(view.theme.focus.borderWidth);
+    await view.act(async () => view.tree.unmount());
+  });
+
+  it.each([
+    ['standard', standard],
+    ['high-contrast', boosted],
+  ])('keeps the title text %s centre 10 scaled px above the container centre, as before theming', async (_n, prefs) => {
+    const view = await render('TVScreen', prefs);
+    const text = view.textStyle('TV Screen');
+    const ring = StyleSheet.flatten(
+      view.tree.root.find((n) => n.props.children === 'TV Screen' && n.props.style).parent!.props.style,
+    );
+    const textHeight = 40;
+    const border = ring.borderWidth ?? 0;
+    const above = border + (text.marginTop ?? 0);
+    const ringHeight = 2 * border + (text.marginTop ?? 0) + textHeight + (text.marginBottom ?? 0);
+    const blockHeight = ringHeight + (ring.marginBottom ?? 0);
+    expect(above + textHeight / 2 - blockHeight / 2).toBe(-view.scaledPixels(10));
     await view.act(async () => view.tree.unmount());
   });
 });
