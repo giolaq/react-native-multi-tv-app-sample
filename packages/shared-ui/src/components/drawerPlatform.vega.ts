@@ -2,7 +2,6 @@ import { DrawerPlatform } from './drawerPlatform.types';
 
 // The Vega navigator never mirrors the drawer in RTL, so the drawer always closes on Right.
 export const drawerPlatform: DrawerPlatform = {
-  profileImage: require('../assets/images/kepler.png'),
   profileImageResizeMode: 'contain',
   labelLines: 1,
   headerPaddingHorizontal: 24,

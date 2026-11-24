@@ -1,6 +1,6 @@
 import { scaledPixels } from '../hooks/useScale';
 import { DrawerContentComponentProps, DrawerContentScrollView } from '@react-navigation/drawer';
-import { View, StyleSheet, Image, Text } from 'react-native';
+import { View, StyleSheet, Image, Text, ImageSourcePropType } from 'react-native';
 import { DefaultFocus, SpatialNavigationFocusableView, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { DrawerParamList } from '../navigation/types';
 import { useMenuContext } from '../components/MenuContext';
@@ -15,7 +15,14 @@ const drawerItems = [
   { name: 'Explore', label: 'Explore' },
 ] as const;
 
-export default function CustomDrawerContent(props: DrawerContentComponentProps) {
+const defaultProfileImage = require('../assets/images/logo.png');
+
+export type CustomDrawerContentProps = DrawerContentComponentProps & { profileImage?: ImageSourcePropType };
+
+export default function CustomDrawerContent({
+  profileImage = defaultProfileImage,
+  ...props
+}: CustomDrawerContentProps) {
   const navigation = props.navigation;
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
   const theme = useTheme();
@@ -45,7 +52,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           contentContainerStyle={drawerPlatform.contentContainerStyle}
         >
           <View style={styles.header}>
-            <Image source={drawerPlatform.profileImage} style={styles.profilePic} />
+            <Image source={profileImage} style={styles.profilePic} />
             <Text style={styles.userName} numberOfLines={drawerPlatform.labelLines}>
               Pioneer Tom
             </Text>

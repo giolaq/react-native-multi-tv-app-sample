@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, Image, Text } from 'react-native';
+import { I18nManager, Image, StyleSheet, Text } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import {
   DefaultFocus,
@@ -8,12 +8,15 @@ import {
   SpatialNavigationRoot,
 } from 'react-tv-space-navigation';
 import { MenuProvider, useMenuContext } from '../../../packages/shared-ui/src/components/MenuContext';
+import { safeZones } from '../../../packages/shared-ui/src/theme';
 import CustomDrawerContent from '../../../packages/shared-ui/src/components/CustomDrawerContent';
 
 jest.mock('../../../packages/shared-ui/src/hooks/useScale', () => ({ scaledPixels: (size: number) => size }));
 jest.mock('@react-navigation/drawer', () => ({
   DrawerContentScrollView: require('react-native').View,
 }));
+
+const actualReactNative = jest.requireActual('react-native');
 
 const navigation = { closeDrawer: jest.fn(), jumpTo: jest.fn(), navigate: jest.fn() };
 
@@ -131,5 +134,33 @@ describe('shared drawer content', () => {
     } finally {
       await act(async () => tree.unmount());
     }
+  });
+
+  it('insets the header by the action-safe margin and adds no content padding', async () => {
+    const { tree } = await mountDrawer();
+    try {
+      const header = tree.root.findByType(Image).parent!;
+      expect(StyleSheet.flatten(header.props.style).paddingHorizontal).toBe(safeZones.actionSafe.horizontal);
+      const scroll = tree.root.findAll((node) => node.props.contentContainerStyle !== undefined)[0];
+      expect(scroll.props.contentContainerStyle).toEqual({});
+    } finally {
+      await act(async () => tree.unmount());
+    }
+  });
+
+  it.each([
+    ['ios', true, { paddingStart: 0, paddingEnd: 0, paddingTop: 0 }],
+    ['ios', false, {}],
+    ['android', true, {}],
+  ])('on %s with isTV=%s the drawer content padding is %j', (os, isTV, expected) => {
+    jest.isolateModules(() => {
+      jest.doMock(
+        'react-native',
+        () =>
+          new Proxy(actualReactNative, { get: (target, key) => (key === 'Platform' ? { OS: os, isTV } : target[key]) }),
+      );
+      const { drawerPlatform } = require('../../../packages/shared-ui/src/components/drawerPlatform');
+      expect(drawerPlatform.contentContainerStyle).toEqual(expected);
+    });
   });
 });

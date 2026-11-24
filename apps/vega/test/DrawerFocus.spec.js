@@ -15,7 +15,7 @@ import {
 } from '../../../packages/shared-ui/src/components/MenuContext';
 import CustomDrawerContent from '../../../packages/shared-ui/src/components/CustomDrawerContent';
 
-const LOGO = require('../../../packages/shared-ui/src/assets/images/kepler.png');
+const LOGO = require('../src/assets/kepler.png');
 
 const mockNavigation = {
   closeDrawer: jest.fn(),
@@ -59,7 +59,7 @@ async function mountDrawer() {
   await act(async () => {
     tree = create(
       <MenuProvider>
-        <CustomDrawerContent navigation={mockNavigation} />
+        <CustomDrawerContent navigation={mockNavigation} profileImage={LOGO} />
         <Content onSelect={onSelect} />
       </MenuProvider>,
     );
