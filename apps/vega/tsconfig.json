@@ -2,13 +2,7 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "types": ["jest", "@amazon-devices/react-native-kepler", "node"],
-    "moduleSuffixes": [".vega", ".kepler", ""],
-    "paths": {
-      "react": ["./node_modules/@types/react"],
-      "react/*": ["./node_modules/@types/react/*"],
-      "react-native": ["./node_modules/react-native"],
-      "react-native/*": ["./node_modules/react-native/*"]
-    }
+    "moduleSuffixes": [".vega", ".kepler", ""]
   },
   "include": [
     "src/**/*.ts",
