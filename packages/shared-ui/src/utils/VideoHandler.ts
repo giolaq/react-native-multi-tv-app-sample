@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from './logger';
 
 /**
  * VideoHandler for non-Kepler platforms (Android, iOS, Web)
@@ -61,24 +62,24 @@ export class VideoHandler {
 
   // Stub methods - not used on non-Kepler platforms
   preBufferVideo = async (componentInstance?: any) => {
-    console.log('[VideoHandler] - preBufferVideo not implemented for this platform');
+    logger.debug('[VideoHandler] - preBufferVideo not implemented for this platform');
   };
 
   destroyVideoElements = (): boolean => {
-    console.log('[VideoHandler] - destroyVideoElements not implemented for this platform');
+    logger.debug('[VideoHandler] - destroyVideoElements not implemented for this platform');
     return true;
   };
 
   play = () => {
-    console.log('[VideoHandler] - play not implemented for this platform');
+    logger.debug('[VideoHandler] - play not implemented for this platform');
   };
 
   pause = () => {
-    console.log('[VideoHandler] - pause not implemented for this platform');
+    logger.debug('[VideoHandler] - pause not implemented for this platform');
   };
 
   seek = (time: number) => {
-    console.log('[VideoHandler] - seek not implemented for this platform');
+    logger.debug('[VideoHandler] - seek not implemented for this platform');
   };
 
   isPaused = (): boolean => {

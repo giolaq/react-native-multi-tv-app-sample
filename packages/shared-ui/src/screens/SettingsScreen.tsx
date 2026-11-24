@@ -14,6 +14,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useMenuContext } from '../components/MenuContext';
 import { useAccessibility } from '../components/AccessibilityContext';
 import { getOpenDrawerDirection } from '../utils/rtl';
+import { logger } from '../utils/logger';
 
 export default function SettingsScreen() {
   const isFocused = useIsFocused();
@@ -148,12 +149,12 @@ export default function SettingsScreen() {
                   <View style={styles.optionsColumn}>
                     <FocusablePressable
                       text="Clear Cache"
-                      onSelect={() => console.log('Clear cache')}
+                      onSelect={() => logger.debug('Clear cache')}
                       style={styles.actionButton}
                     />
                     <FocusablePressable
                       text="Sign Out"
-                      onSelect={() => console.log('Sign out')}
+                      onSelect={() => logger.debug('Sign out')}
                       style={styles.actionButton}
                     />
                   </View>

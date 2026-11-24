@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 // Catalog API types
 export type CatalogItem = {
   id: string;
@@ -77,7 +78,7 @@ export const fetchMoviesData = async (): Promise<CardData[]> => {
     const data: CatalogResponse = await response.json();
     return data.items.map(transformCatalogItem);
   } catch (error) {
-    console.error('Failed to fetch movies catalog:', error);
+    logger.error('Failed to fetch movies catalog:', error);
     throw error;
   }
 };

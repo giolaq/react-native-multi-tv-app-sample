@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import RemoteControlManager from './RemoteControlManager';
 import { SupportedKeys } from './SupportedKeys';
 import { useMenuContext } from '../../components/MenuContext';
+import { logger } from '../../utils/logger';
 
 export const GoBackConfiguration: React.FC = () => {
   const navigation = useNavigation();
@@ -12,7 +13,7 @@ export const GoBackConfiguration: React.FC = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
       if (isMenuOpen) {
-        console.log('Menu is open during back navigation');
+        logger.debug('Menu is open during back navigation');
       }
     }
   }, [navigation, isMenuOpen]);

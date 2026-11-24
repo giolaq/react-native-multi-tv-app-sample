@@ -20,6 +20,7 @@ import { fetchMoviesData, CardData } from '../data/moviesData';
 import { colors, safeZones } from '../theme';
 import PlatformLinearGradient from '../components/PlatformLinearGradient';
 import { getOpenDrawerDirection } from '../utils/rtl';
+import { logger } from '../utils/logger';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawerNavigator'>;
 
@@ -33,8 +34,7 @@ const MovieItem = React.memo(({ item, isFocused, styles }: { item: CardData; isF
         source={imageSource}
         style={styles.cardImage}
         resizeMode="cover"
-        onError={(error) => console.log('Image load error:', item.title, error.nativeEvent.error)}
-        onLoad={() => console.log('Image loaded:', item.title)}
+        onError={(error) => logger.debug('Image load error:', item.title, error.nativeEvent.error)}
       />
     </View>
   );
@@ -58,11 +58,9 @@ export default function HomeScreen() {
       try {
         setIsLoading(true);
         const movies = await fetchMoviesData();
-        console.log('Fetched movies:', movies.length);
-        console.log('First movie:', movies[0]);
         setMoviesData(movies);
       } catch (error) {
-        console.error('Failed to load movies:', error);
+        logger.error('Failed to load movies:', error);
       } finally {
         setIsLoading(false);
       }

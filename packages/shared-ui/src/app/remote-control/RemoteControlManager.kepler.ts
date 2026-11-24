@@ -2,6 +2,7 @@ import mitt from 'mitt';
 import type { HWEvent } from 'react-native';
 import { SupportedKeys } from './SupportedKeys';
 import { RemoteControlManagerInterface } from './RemoteControlManager.interface';
+import { logger } from '../../utils/logger';
 
 // Map Vega/Kepler HWEvent eventType to SupportedKeys.
 // RN 0.83 reports normalized names on newer Vega OS and raw key names on older ones, so map both.
@@ -31,7 +32,7 @@ class RemoteControlManager implements RemoteControlManagerInterface {
     const { TVEventHandler } = require('react-native');
     this.tvEventHandler = new TVEventHandler();
     this.tvEventHandler.enable(this, this.handleHWEvent);
-    console.log('[RemoteControlManager.kepler] TVEventHandler enabled');
+    logger.debug('[RemoteControlManager.kepler] TVEventHandler enabled');
   }
 
   private handleHWEvent = (_component: any, event: HWEvent): void => {
@@ -40,7 +41,7 @@ class RemoteControlManager implements RemoteControlManagerInterface {
     if (event.eventKeyAction === 0 || event.eventKeyAction === undefined) {
       const mappedKey = EVENT_TYPE_MAPPING[event.eventType];
       if (mappedKey) {
-        console.log(`[Kepler] Key pressed: ${mappedKey} (eventType: ${event.eventType})`);
+        logger.debug(`[Kepler] Key pressed: ${mappedKey} (eventType: ${event.eventType})`);
         this.eventEmitter.emit('keyDown', mappedKey);
       }
     }
@@ -48,13 +49,13 @@ class RemoteControlManager implements RemoteControlManagerInterface {
 
   addKeydownListener = (listener: (event: SupportedKeys) => void): ((event: SupportedKeys) => void) => {
     this.eventEmitter.on('keyDown', listener);
-    console.log('[RemoteControlManager.kepler] Key listener added');
+    logger.debug('[RemoteControlManager.kepler] Key listener added');
     return listener;
   };
 
   removeKeydownListener = (listener: (event: SupportedKeys) => void): void => {
     this.eventEmitter.off('keyDown', listener);
-    console.log('[RemoteControlManager.kepler] Key listener removed');
+    logger.debug('[RemoteControlManager.kepler] Key listener removed');
   };
 
   emitKeyDown = (key: SupportedKeys): void => {
@@ -63,7 +64,7 @@ class RemoteControlManager implements RemoteControlManagerInterface {
 
   cleanup = (): void => {
     this.tvEventHandler.disable();
-    console.log('[RemoteControlManager.kepler] TVEventHandler disabled');
+    logger.debug('[RemoteControlManager.kepler] TVEventHandler disabled');
   };
 }
 

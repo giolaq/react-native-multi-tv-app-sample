@@ -3,6 +3,7 @@ import {
   KeplerMediaControlHandler,
   VideoPlayer,
 } from '@amazon-devices/react-native-w3cmedia';
+import { logger } from './logger';
 
 const SKIP_INTERVAL_SECONDS = 10;
 
@@ -39,11 +40,11 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handlePlay(mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handlePlay()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handlePlay()');
       this.videoPlayer?.play();
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handlePlay()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handlePlay()');
       super.handlePlay(mediaSessionId);
     }
   }
@@ -54,11 +55,11 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handlePause(mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handlePause()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handlePause()');
       this.videoPlayer?.pause();
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handlePause()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handlePause()');
       super.handlePause(mediaSessionId);
     }
   }
@@ -69,11 +70,11 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handleStop(mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handleStop()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handleStop()');
       this.videoPlayer?.pause();
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handleStop()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handleStop()');
       super.handleStop(mediaSessionId);
     }
   }
@@ -84,17 +85,17 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handleTogglePlayPause(mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handleTogglePlayPause()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handleTogglePlayPause()');
       if (this.videoPlayer?.paused) {
-        console.log('[AppOverrideMediaControlHandler] - Player is paused, initiating play');
+        logger.debug('[AppOverrideMediaControlHandler] - Player is paused, initiating play');
         this.videoPlayer?.play();
       } else {
-        console.log('[AppOverrideMediaControlHandler] - Player is playing, initiating pause');
+        logger.debug('[AppOverrideMediaControlHandler] - Player is playing, initiating pause');
         this.videoPlayer?.pause();
       }
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handleTogglePlayPause()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handleTogglePlayPause()');
       super.handleTogglePlayPause(mediaSessionId);
     }
   }
@@ -105,12 +106,12 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handleStartOver(mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handleStartOver()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handleStartOver()');
       this.videoPlayer!.currentTime = 0;
       this.videoPlayer?.play();
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handleStartOver()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handleStartOver()');
       super.handleStartOver(mediaSessionId);
     }
   }
@@ -120,7 +121,7 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
    * Note: Fast forward/rewind can be disabled here if handled by custom seek bar
    */
   async handleFastForward(mediaSessionId?: IMediaSessionId) {
-    console.log(
+    logger.debug(
       '[AppOverrideMediaControlHandler] - Fast forward disabled (handled by seek bar). mediaSessionId:',
       mediaSessionId,
     );
@@ -132,7 +133,7 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
    * Note: Fast forward/rewind can be disabled here if handled by custom seek bar
    */
   async handleRewind(mediaSessionId?: IMediaSessionId) {
-    console.log(
+    logger.debug(
       '[AppOverrideMediaControlHandler] - Rewind disabled (handled by seek bar). mediaSessionId:',
       mediaSessionId,
     );
@@ -145,11 +146,11 @@ export class AppOverrideMediaControlHandler extends KeplerMediaControlHandler {
   async handleSeek(position: ITimeValue, mediaSessionId?: IMediaSessionId) {
     if (this.clientOverrideNeeded) {
       // Custom handling
-      console.log('[AppOverrideMediaControlHandler] - Custom handleSeek()');
+      logger.debug('[AppOverrideMediaControlHandler] - Custom handleSeek()');
       super.handleSeek(position, mediaSessionId);
     } else {
       // Default handler
-      console.log('[AppOverrideMediaControlHandler] - Default handleSeek()');
+      logger.debug('[AppOverrideMediaControlHandler] - Default handleSeek()');
       super.handleSeek(position, mediaSessionId);
     }
   }

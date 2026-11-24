@@ -16,6 +16,7 @@ import ExitButton from '../components/player/ExitButton';
 import VideoPlayer from '../components/player/VideoPlayer.vega';
 import { RootStackParamList } from '../navigation/types';
 import { VideoHandler } from '../utils/VideoHandler.kepler';
+import { logger } from '../utils/logger';
 
 type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
 type PlayerScreenNavigationProp = NativeStackNavigationProp<
@@ -101,7 +102,7 @@ export default function PlayerScreen() {
         currentTimeRef.current = clampedTime;
         showControls();
       } catch (e) {
-        console.warn('[PlayerScreen.kepler] Seek error:', e);
+        logger.warn('[PlayerScreen.kepler] Seek error:', e);
       }
     }
   }, [showControls]);
@@ -121,7 +122,7 @@ export default function PlayerScreen() {
         }
         showControls();
       } catch (e) {
-        console.warn('[PlayerScreen.kepler] Play/pause error:', e);
+        logger.warn('[PlayerScreen.kepler] Play/pause error:', e);
       }
     }
   }, [showControls]);
@@ -130,7 +131,7 @@ export default function PlayerScreen() {
    * Navigate back with cleanup
    */
   const navigateBack = useCallback(() => {
-    console.log('[PlayerScreen.kepler] - Navigating back');
+    logger.debug('[PlayerScreen.kepler] - Navigating back');
 
     // Clear surface and caption handles
     if (surfaceHandleRef.current && videoRef.current) {
@@ -156,7 +157,7 @@ export default function PlayerScreen() {
   useEffect(() => {
     if (!isFocused) return;
 
-    console.log('[PlayerScreen.kepler] - Initializing video handler');
+    logger.debug('[PlayerScreen.kepler] - Initializing video handler');
 
     // Create video handler
     videoHandlerRef.current = new VideoHandler(
@@ -176,7 +177,7 @@ export default function PlayerScreen() {
 
     return () => {
       // Cleanup on unmount
-      console.log('[PlayerScreen.kepler] - Cleaning up video handler');
+      logger.debug('[PlayerScreen.kepler] - Cleaning up video handler');
       if (surfaceHandleRef.current && videoRef.current) {
         videoRef.current.clearSurfaceHandle(surfaceHandleRef.current);
       }
@@ -235,7 +236,7 @@ export default function PlayerScreen() {
             break;
         }
       } catch (e) {
-        console.error('[PlayerScreen.kepler] Key handler error:', e);
+        logger.error('[PlayerScreen.kepler] Key handler error:', e);
       }
     };
 
@@ -260,7 +261,7 @@ export default function PlayerScreen() {
    * Handle surface view creation
    */
   const onSurfaceViewCreated = useCallback((surfaceHandle: string) => {
-    console.log('[PlayerScreen.kepler] - Surface view created:', surfaceHandle);
+    logger.debug('[PlayerScreen.kepler] - Surface view created:', surfaceHandle);
     surfaceHandleRef.current = surfaceHandle;
 
     // Set surface handle on video player
@@ -276,7 +277,7 @@ export default function PlayerScreen() {
    * Handle surface view destruction
    */
   const onSurfaceViewDestroyed = useCallback((surfaceHandle: string) => {
-    console.log(
+    logger.debug(
       '[PlayerScreen.kepler] - Surface view destroyed:',
       surfaceHandle,
     );
@@ -290,7 +291,7 @@ export default function PlayerScreen() {
    * Handle caption view creation
    */
   const onCaptionViewCreated = useCallback((captionHandle: string) => {
-    console.log('[PlayerScreen.kepler] - Caption view created:', captionHandle);
+    logger.debug('[PlayerScreen.kepler] - Caption view created:', captionHandle);
     captionViewHandleRef.current = captionHandle;
 
     if (videoRef.current) {
@@ -302,7 +303,7 @@ export default function PlayerScreen() {
    * Handle caption view destruction
    */
   const onCaptionViewDestroyed = useCallback((captionHandle: string) => {
-    console.log(
+    logger.debug(
       '[PlayerScreen.kepler] - Caption view destroyed:',
       captionHandle,
     );

@@ -1,10 +1,11 @@
 import { Directions, SpatialNavigation } from 'react-tv-space-navigation';
 import { SupportedKeys } from './remote-control/SupportedKeys';
 import RemoteControlManager from './remote-control/RemoteControlManager';
+import { logger } from '../utils/logger';
 
 SpatialNavigation.configureRemoteControl({
   remoteControlSubscriber: (callback) => {
-    console.log('Configure remote control');
+    logger.debug('Configure remote control');
 
     const mapping: { [key in SupportedKeys]: Directions | null } = {
       [SupportedKeys.Right]: Directions.RIGHT,
