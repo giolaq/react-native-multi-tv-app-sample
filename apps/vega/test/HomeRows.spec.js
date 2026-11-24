@@ -7,7 +7,6 @@ let HomeScreen;
 let fetchMoviesData;
 
 beforeEach(() => {
-  // The catalog store is module state, so each test needs a fresh registry.
   jest.resetModules();
   React = require('react');
   ({act, create} = require('react-test-renderer'));
@@ -51,7 +50,6 @@ const film = (id, releaseYear, trending) => ({
   trending,
 });
 
-// Rows: Trending [hit, oldie], New Releases [fresh, hit], From the Archive [oldie, vintage].
 const catalog = [
   film('fresh', 2023, false),
   film('hit', 2024, true),
