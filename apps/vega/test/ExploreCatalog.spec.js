@@ -1,8 +1,22 @@
-import React from 'react';
-import {act, create} from 'react-test-renderer';
-import {SpatialNavigation} from 'react-tv-space-navigation';
-import ExploreScreen from '../../../packages/shared-ui/src/screens/ExploreScreen';
-import {fetchMoviesData} from '../../../packages/shared-ui/src/data/moviesData';
+let React;
+let act;
+let create;
+let SpatialNavigation;
+let ExploreScreen;
+let fetchMoviesData;
+
+beforeEach(() => {
+  // The catalog store is module state, so each test needs a fresh registry.
+  jest.resetModules();
+  React = require('react');
+  ({act, create} = require('react-test-renderer'));
+  ({SpatialNavigation} = require('react-tv-space-navigation'));
+  ExploreScreen =
+    require('../../../packages/shared-ui/src/screens/ExploreScreen').default;
+  ({
+    fetchMoviesData,
+  } = require('../../../packages/shared-ui/src/data/moviesData'));
+});
 
 const mockNavigation = {dispatch: jest.fn(), navigate: jest.fn()};
 const mockToggleMenu = jest.fn();

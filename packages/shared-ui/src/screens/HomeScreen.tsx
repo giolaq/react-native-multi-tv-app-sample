@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { DrawerActions, useIsFocused } from '@react-navigation/native';
 import { useMenuContext } from '../components/MenuContext';
 import {
@@ -16,7 +16,8 @@ import {
 import { Direction } from '@bam.tech/lrud';
 import { scaledPixels } from '../hooks/useScale';
 import { RootStackParamList } from '../navigation/types';
-import { fetchMoviesData, CardData } from '../data/moviesData';
+import { CardData } from '../data/moviesData';
+import { useCatalog } from '../hooks/useCatalog';
 import { colors, safeZones } from '../theme';
 import PlatformLinearGradient from '../components/PlatformLinearGradient';
 import { getOpenDrawerDirection } from '../utils/rtl';
@@ -49,27 +50,10 @@ export default function HomeScreen() {
   const classicsRef = useRef<SpatialNavigationVirtualizedListRef>(null);
   const hipAndModernRef = useRef<SpatialNavigationVirtualizedListRef>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const [moviesData, setMoviesData] = useState<CardData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const catalog = useCatalog();
+  const moviesData = useMemo(() => (catalog.status === 'loaded' ? catalog.items : []), [catalog]);
   const isFocused = useIsFocused();
   const isActive = isFocused && !isMenuOpen;
-
-  // Fetch movies from catalog on mount
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        setIsLoading(true);
-        const movies = await fetchMoviesData();
-        setMoviesData(movies);
-      } catch (error) {
-        logger.error('Failed to load movies:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadMovies();
-  }, []);
 
   const focusedItem = useMemo(() => moviesData[focusedIndex] || null, [focusedIndex, moviesData]);
 
@@ -161,7 +145,7 @@ export default function HomeScreen() {
   );
 
   // Show loading state while fetching data
-  if (isLoading || moviesData.length === 0) {
+  if (moviesData.length === 0) {
     return (
       <View style={gridStyles.container}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
