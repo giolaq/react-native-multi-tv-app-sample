@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DrawerActions, useIsFocused, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,7 +11,7 @@ import {
 import { useTheme } from '../components/AccessibilityContext';
 import FocusablePressable from '../components/FocusablePressable';
 import { useMenuContext } from '../components/MenuContext';
-import { CardData, fetchMoviesData } from '../data/moviesData';
+import { useCatalog } from '../hooks/useCatalog';
 import { scaledPixels } from '../hooks/useScale';
 import type { RootStackParamList } from '../navigation/types';
 import { safeZones, Theme } from '../theme';
@@ -23,24 +23,9 @@ export default function ExploreScreen() {
   const { isOpen, toggleMenu } = useMenuContext();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [movies, setMovies] = useState<CardData[] | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    fetchMoviesData().then(
-      (items) => {
-        if (active) setMovies(items);
-      },
-      () => {
-        if (active) setFailed(true);
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [attempt]);
+  const catalog = useCatalog();
+  const movies = catalog.status === 'loaded' ? catalog.items : null;
+  const failed = catalog.status === 'failed';
 
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -88,13 +73,7 @@ export default function ExploreScreen() {
             </Text>
             <DefaultFocus>
               {failed ? (
-                <FocusablePressable
-                  text="Retry"
-                  onSelect={() => {
-                    setFailed(false);
-                    setAttempt((n) => n + 1);
-                  }}
-                />
+                <FocusablePressable text="Retry" onSelect={catalog.retry} />
               ) : (
                 <FocusablePressable text="Open menu" onSelect={openDrawer} />
               )}

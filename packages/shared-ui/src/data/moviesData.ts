@@ -82,6 +82,3 @@ export const fetchMoviesData = async (): Promise<CardData[]> => {
     throw error;
   }
 };
-
-// Empty array as placeholder - movies will be fetched dynamically
-export const moviesData: CardData[] = [];

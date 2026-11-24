@@ -1,8 +1,40 @@
 import React from 'react';
+import {
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import {act, create} from 'react-test-renderer';
 import {SpatialNavigation} from 'react-tv-space-navigation';
 import ExploreScreen from '../../../packages/shared-ui/src/screens/ExploreScreen';
+import {createCatalogStore} from '../../../packages/shared-ui/src/data/catalogStore';
 import {fetchMoviesData} from '../../../packages/shared-ui/src/data/moviesData';
+
+// React Native loads these on first access. Loading them here keeps that cold cost out of the first test's timeout.
+void [Animated, Easing, Image, Pressable, ScrollView, Text, View];
+
+// A fresh store per test, instead of resetting every module and reloading React Native inside each test.
+const mockStore = {};
+jest.mock('../../../packages/shared-ui/src/data/catalogStore', () =>
+  Object.defineProperty(
+    {
+      ...jest.requireActual(
+        '../../../packages/shared-ui/src/data/catalogStore',
+      ),
+    },
+    'catalogStore',
+    {get: () => mockStore.current},
+  ),
+);
+
+beforeEach(() => {
+  fetchMoviesData.mockReset();
+  mockStore.current = createCatalogStore(fetchMoviesData);
+});
 
 const mockNavigation = {dispatch: jest.fn(), navigate: jest.fn()};
 const mockToggleMenu = jest.fn();
