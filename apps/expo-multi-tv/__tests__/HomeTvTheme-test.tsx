@@ -203,4 +203,23 @@ describe('TVScreen theme', () => {
     expect(ring.borderWidth).toBe(view.theme.focus.borderWidth);
     await view.act(async () => view.tree.unmount());
   });
+
+  it.each([
+    ['standard', standard],
+    ['high-contrast', boosted],
+  ])('keeps the title text %s centre 10 scaled px above the container centre, as before theming', async (_n, prefs) => {
+    const view = await render('TVScreen', prefs);
+    const { StyleSheet } = require('react-native');
+    const text = view.textStyle('TV Screen');
+    const ring = StyleSheet.flatten(
+      view.tree.root.find((n) => n.props.children === 'TV Screen' && n.props.style).parent!.props.style,
+    );
+    const textHeight = 40;
+    const border = ring.borderWidth ?? 0;
+    const above = border + (text.marginTop ?? 0);
+    const ringHeight = 2 * border + (text.marginTop ?? 0) + textHeight + (text.marginBottom ?? 0);
+    const blockHeight = ringHeight + (ring.marginBottom ?? 0);
+    expect(above + textHeight / 2 - blockHeight / 2).toBe(-view.scaledPixels(10));
+    await view.act(async () => view.tree.unmount());
+  });
 });

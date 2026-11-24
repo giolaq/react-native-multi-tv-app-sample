@@ -61,6 +61,7 @@ const createStyles = ({ colors, fontSize, focus }: Theme) =>
     },
     titleRing: {
       paddingHorizontal: scaledPixels(24),
+      marginBottom: scaledPixels(20),
       borderRadius: scaledPixels(8),
       borderWidth: focus.borderWidth,
       borderColor: focus.restingBorderColor,
