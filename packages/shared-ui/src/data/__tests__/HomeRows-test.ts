@@ -39,3 +39,13 @@ it('hides a row that has no items', () => {
 it('returns no rows for an empty catalog', () => {
   expect(selectHomeRows([])).toEqual([]);
 });
+
+it.each([
+  ['null', null],
+  ['a string', '2020'],
+  ['NaN', NaN],
+])('keeps a title whose release year is %s out of the year rows', (_label, releaseYear) => {
+  const malformed = { ...card('malformed', undefined, false), releaseYear } as unknown as CardData;
+
+  expect(selectHomeRows([malformed])).toEqual([]);
+});
