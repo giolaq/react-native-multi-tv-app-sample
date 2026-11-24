@@ -1,3 +1,5 @@
+import type {MovieRouteParams} from '@multi-tv/shared-ui';
+
 export type DrawerParamList = {
   Home: undefined;
   Explore: undefined;
@@ -7,6 +9,6 @@ export type DrawerParamList = {
 
 export type RootStackParamList = {
   Main: undefined;
-  Details: { itemId: string };
-  Player: { videoId: string };
+  Details: MovieRouteParams;
+  Player: MovieRouteParams;
 };

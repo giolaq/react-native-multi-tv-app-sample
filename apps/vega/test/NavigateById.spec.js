@@ -39,23 +39,26 @@ jest.mock(
   {virtual: true},
 );
 // Shared UI resolves its own copy of the Kepler package.
-jest.mock('../../../packages/shared-ui/node_modules/@amazon-devices/react-native-kepler', () => ({
-  useKeplerAppStateManager: () => ({getComponentInstance: () => ({})}),
-}));
-jest.mock('../../../packages/shared-ui/src/app/remote-control/RemoteControlManager', () => ({
-  addKeydownListener: (listener) => listener,
-  removeKeydownListener: () => {},
-}));
 jest.mock(
-  '../../../packages/shared-ui/src/utils/VideoHandler.kepler',
+  '../../../packages/shared-ui/node_modules/@amazon-devices/react-native-kepler',
   () => ({
-    VideoHandler: function VideoHandler(_ref, movie, headerImage) {
-      mockVideoHandler(movie, headerImage);
-      this.preBufferVideo = () => {};
-      this.destroyVideoElements = () => {};
-    },
+    useKeplerAppStateManager: () => ({getComponentInstance: () => ({})}),
   }),
 );
+jest.mock(
+  '../../../packages/shared-ui/src/app/remote-control/RemoteControlManager',
+  () => ({
+    addKeydownListener: (listener) => listener,
+    removeKeydownListener: () => {},
+  }),
+);
+jest.mock('../../../packages/shared-ui/src/utils/VideoHandler.kepler', () => ({
+  VideoHandler: function VideoHandler(_ref, movie, headerImage) {
+    mockVideoHandler(movie, headerImage);
+    this.preBufferVideo = () => {};
+    this.destroyVideoElements = () => {};
+  },
+}));
 
 const film = (id, title) => ({
   id,
@@ -74,7 +77,9 @@ beforeEach(() => {
   React = require('react');
   ({act, create} = require('react-test-renderer'));
   ({SpatialNavigation} = require('react-tv-space-navigation'));
-  ({fetchMoviesData} = require('../../../packages/shared-ui/src/data/moviesData'));
+  ({
+    fetchMoviesData,
+  } = require('../../../packages/shared-ui/src/data/moviesData'));
   mockNavigation.navigate.mockClear();
   mockNavigation.goBack.mockClear();
   mockVideoHandler.mockClear();
@@ -121,7 +126,9 @@ it('opens Details from a Home card with only its id and keeps that card selected
   try {
     await press('right');
     await press('enter');
-    expect(mockNavigation.navigate).toHaveBeenLastCalledWith('Details', {id: 7});
+    expect(mockNavigation.navigate).toHaveBeenLastCalledWith('Details', {
+      id: 7,
+    });
 
     mockScreenFocused = false;
     await act(async () => tree.update(<Home />));
@@ -129,7 +136,9 @@ it('opens Details from a Home card with only its id and keeps that card selected
     await act(async () => tree.update(<Home />));
     await press('enter');
     expect(mockNavigation.navigate).toHaveBeenCalledTimes(2);
-    expect(mockNavigation.navigate).toHaveBeenLastCalledWith('Details', {id: 7});
+    expect(mockNavigation.navigate).toHaveBeenLastCalledWith('Details', {
+      id: 7,
+    });
   } finally {
     await act(async () => tree.unmount());
   }
@@ -140,7 +149,9 @@ it('opens Details from Explore with only the id', async () => {
   const {tree, press} = await render(screen('ExploreScreen'));
   try {
     await press('enter');
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('Details', {id: 'first'});
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Details', {
+      id: 'first',
+    });
   } finally {
     await act(async () => tree.unmount());
   }
@@ -166,7 +177,9 @@ it('shows a loader until the catalog arrives, then the title', async () => {
   mockRouteParams = {id: 'first'};
   const {tree} = await render(screen('DetailsScreen'));
   try {
-    expect(tree.root.findAllByType(require('react-native').ActivityIndicator)).toHaveLength(1);
+    expect(
+      tree.root.findAllByType(require('react-native').ActivityIndicator),
+    ).toHaveLength(1);
     expect(shows(tree, 'First')).toBe(false);
     await act(async () => resolve(catalog));
     expect(shows(tree, 'First')).toBe(true);
@@ -175,7 +188,7 @@ it('shows a loader until the catalog arrives, then the title', async () => {
   }
 });
 
-it('offers Retry when the catalog fails, then shows the title', async () => {
+it('offers Retry and Back when the catalog fails, and Retry shows the title', async () => {
   fetchMoviesData
     .mockRejectedValueOnce(new Error('offline'))
     .mockResolvedValueOnce(catalog);
@@ -183,6 +196,10 @@ it('offers Retry when the catalog fails, then shows the title', async () => {
   const {tree, press} = await render(screen('DetailsScreen'));
   try {
     expect(shows(tree, 'Retry')).toBe(true);
+    await press('down');
+    await press('enter');
+    expect(mockNavigation.goBack).toHaveBeenCalledTimes(1);
+    await press('up');
     await press('enter');
     expect(shows(tree, 'First')).toBe(true);
   } finally {

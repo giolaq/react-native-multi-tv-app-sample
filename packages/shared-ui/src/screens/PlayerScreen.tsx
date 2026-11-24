@@ -10,6 +10,9 @@ import FocusablePressable from '../components/FocusablePressable';
 import VideoOverlay from '../components/player/VideoOverlay';
 import { VideoRef } from 'react-native-video';
 import VideoPlayer from '../components/player/VideoPlayer';
+import MovieLookupStatus from '../components/MovieLookupStatus';
+import type { CardData } from '../data/moviesData';
+import { useMovie } from '../hooks/useMovie';
 import { RootStackParamList } from '../navigation/types';
 
 const SHOW_NATIVE_CONTROLS = Platform.OS === 'ios';
@@ -18,9 +21,17 @@ type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
 type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Player'>;
 
 export default function PlayerScreen() {
-  const route = useRoute<PlayerScreenRouteProp>();
+  const { id } = useRoute<PlayerScreenRouteProp>().params;
+  const lookup = useMovie(id);
+  return lookup.status === 'found' ? (
+    <MoviePlayer movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
+  ) : (
+    <MovieLookupStatus lookup={lookup} />
+  );
+}
+
+function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerImage'>) {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
-  const { movie, headerImage } = route.params;
   const isFocused = useIsFocused();
   const [failed, setFailed] = useState(false);
   const [paused, setPaused] = useState<boolean>(false);

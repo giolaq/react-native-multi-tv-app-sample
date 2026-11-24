@@ -6,6 +6,9 @@ import { scaledPixels } from '../hooks/useScale';
 import { useCallback, useMemo } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import FocusablePressable from '../components/FocusablePressable';
+import MovieLookupStatus from '../components/MovieLookupStatus';
+import type { CardData } from '../data/moviesData';
+import { useMovie } from '../hooks/useMovie';
 import { RootStackParamList } from '../navigation/types';
 import { safeZones, Theme } from '../theme';
 import { useTheme } from '../components/AccessibilityContext';
@@ -14,21 +17,15 @@ type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'Details'>;
 type DetailsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Details'>;
 
 export default function DetailsScreen() {
-  const route = useRoute<DetailsScreenRouteProp>();
+  const { id } = useRoute<DetailsScreenRouteProp>().params;
+  const lookup = useMovie(id);
+  return lookup.status === 'found' ? <MovieDetails movie={lookup.movie} /> : <MovieLookupStatus lookup={lookup} />;
+}
+
+function MovieDetails({ movie }: { movie: CardData }) {
   const navigation = useNavigation<DetailsScreenNavigationProp>();
-  const {
-    title,
-    description,
-    movie,
-    headerImage,
-    category,
-    genres,
-    releaseYear,
-    rating,
-    ratingCount,
-    contentRating,
-    duration
-  } = route.params;
+  const { id, title, description, headerImage, genres, releaseYear, rating, ratingCount, contentRating, duration } =
+    movie;
 
   const isFocused = useIsFocused();
   const theme = useTheme();
@@ -38,10 +35,7 @@ export default function DetailsScreen() {
   const imageSource = useMemo(() => ({ uri: headerImage }), [headerImage]);
 
   // Memoize button style to prevent unnecessary re-renders
-  const buttonStyle = useMemo(
-    () => ({ paddingHorizontal: scaledPixels(30) }),
-    [],
-  );
+  const buttonStyle = useMemo(() => ({ paddingHorizontal: scaledPixels(30) }), []);
 
   // Format duration from seconds to human-readable format
   const formattedDuration = useMemo(() => {
@@ -58,11 +52,8 @@ export default function DetailsScreen() {
   }, [rating, ratingCount]);
 
   const navigate = useCallback(() => {
-    navigation.navigate('Player', {
-      movie: movie,
-      headerImage: headerImage,
-    });
-  }, [navigation, movie, headerImage]);
+    navigation.navigate('Player', { id });
+  }, [navigation, id]);
 
   return (
     <SpatialNavigationRoot isActive={isFocused}>
@@ -74,18 +65,10 @@ export default function DetailsScreen() {
 
             {/* Metadata row */}
             <View style={detailsStyles.metadataRow}>
-              {releaseYear && (
-                <Text style={detailsStyles.metadataText}>{releaseYear}</Text>
-              )}
-              {contentRating && (
-                <Text style={detailsStyles.metadataText}>{contentRating}</Text>
-              )}
-              {formattedDuration && (
-                <Text style={detailsStyles.metadataText}>{formattedDuration}</Text>
-              )}
-              {ratingDisplay && (
-                <Text style={detailsStyles.metadataText}>{ratingDisplay}</Text>
-              )}
+              {releaseYear && <Text style={detailsStyles.metadataText}>{releaseYear}</Text>}
+              {contentRating && <Text style={detailsStyles.metadataText}>{contentRating}</Text>}
+              {formattedDuration && <Text style={detailsStyles.metadataText}>{formattedDuration}</Text>}
+              {ratingDisplay && <Text style={detailsStyles.metadataText}>{ratingDisplay}</Text>}
             </View>
 
             {/* Genres */}
@@ -117,11 +100,7 @@ export default function DetailsScreen() {
               </View>
             </View>
             <DefaultFocus>
-              <FocusablePressable
-                text={'Watch now'}
-                onSelect={navigate}
-                style={buttonStyle}
-              />
+              <FocusablePressable text={'Watch now'} onSelect={navigate} style={buttonStyle} />
             </DefaultFocus>
           </View>
         </View>

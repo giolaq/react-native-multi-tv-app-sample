@@ -81,10 +81,7 @@ it('opens a title by remote, restores its focus after Details and can reopen the
     });
     await press('down');
     await press('enter');
-    expect(mockNavigation.navigate).toHaveBeenCalledWith(
-      'Details',
-      expect.objectContaining(movies[1]),
-    );
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Details', {id: '2'});
     mockScreenFocused = false;
     await act(async () => tree.update(<ExploreScreen />));
     await press('enter');
@@ -92,10 +89,9 @@ it('opens a title by remote, restores its focus after Details and can reopen the
     mockScreenFocused = true;
     await act(async () => tree.update(<ExploreScreen />));
     await press('enter');
-    expect(mockNavigation.navigate).toHaveBeenLastCalledWith(
-      'Details',
-      expect.objectContaining(movies[1]),
-    );
+    expect(mockNavigation.navigate).toHaveBeenLastCalledWith('Details', {
+      id: '2',
+    });
     expect(mockNavigation.navigate).toHaveBeenCalledTimes(2);
     await press('left');
     expect(mockNavigation.dispatch).toHaveBeenCalledWith({type: 'OPEN_DRAWER'});

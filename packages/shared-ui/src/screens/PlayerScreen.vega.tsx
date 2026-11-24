@@ -11,6 +11,9 @@ import { SupportedKeys } from '../app/remote-control/SupportedKeys';
 import VideoOverlay from '../components/player/VideoOverlay.vega';
 import ExitButton from '../components/player/ExitButton';
 import VideoPlayer from '../components/player/VideoPlayer.vega';
+import MovieLookupStatus from '../components/MovieLookupStatus';
+import type { CardData } from '../data/moviesData';
+import { useMovie } from '../hooks/useMovie';
 import { RootStackParamList } from '../navigation/types';
 import { VideoHandler } from '../utils/VideoHandler.kepler';
 import { logger } from '../utils/logger';
@@ -32,9 +35,17 @@ type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 
  * - Handles Fire TV remote control events
  */
 export default function PlayerScreen() {
-  const route = useRoute<PlayerScreenRouteProp>();
+  const { id } = useRoute<PlayerScreenRouteProp>().params;
+  const lookup = useMovie(id);
+  return lookup.status === 'found' ? (
+    <MoviePlayer movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
+  ) : (
+    <MovieLookupStatus lookup={lookup} />
+  );
+}
+
+function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerImage'>) {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
-  const { movie, headerImage } = route.params;
   const isFocused = useIsFocused();
 
   // Kepler-specific hooks
