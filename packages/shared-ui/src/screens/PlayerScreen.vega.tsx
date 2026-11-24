@@ -4,10 +4,7 @@ import { SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  IKeplerAppStateManager,
-  useKeplerAppStateManager,
-} from '@amazon-devices/react-native-kepler';
+import { IKeplerAppStateManager, useKeplerAppStateManager } from '@amazon-devices/react-native-kepler';
 import { VideoPlayer as W3CVideoPlayer } from '@amazon-devices/react-native-w3cmedia';
 import RemoteControlManager from '../app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../app/remote-control/SupportedKeys';
@@ -19,10 +16,7 @@ import { VideoHandler } from '../utils/VideoHandler.kepler';
 import { logger } from '../utils/logger';
 
 type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
-type PlayerScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Player'
->;
+type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Player'>;
 
 /**
  * PlayerScreen for Vega/Kepler Platform
@@ -44,8 +38,7 @@ export default function PlayerScreen() {
   const isFocused = useIsFocused();
 
   // Kepler-specific hooks
-  const keplerAppStateManager: IKeplerAppStateManager =
-    useKeplerAppStateManager();
+  const keplerAppStateManager: IKeplerAppStateManager = useKeplerAppStateManager();
   const componentInstance = keplerAppStateManager.getComponentInstance();
 
   // Video state
@@ -93,19 +86,22 @@ export default function PlayerScreen() {
   /**
    * Seek to a specific time
    */
-  const seek = useCallback((time: number) => {
-    if (videoHandlerRef.current && durationRef.current) {
-      try {
-        const clampedTime = Math.max(0, Math.min(time, durationRef.current));
-        videoHandlerRef.current.seek(clampedTime);
-        setCurrentTime(clampedTime);
-        currentTimeRef.current = clampedTime;
-        showControls();
-      } catch (e) {
-        logger.warn('[PlayerScreen.kepler] Seek error:', e);
+  const seek = useCallback(
+    (time: number) => {
+      if (videoHandlerRef.current && durationRef.current) {
+        try {
+          const clampedTime = Math.max(0, Math.min(time, durationRef.current));
+          videoHandlerRef.current.seek(clampedTime);
+          setCurrentTime(clampedTime);
+          currentTimeRef.current = clampedTime;
+          showControls();
+        } catch (e) {
+          logger.warn('[PlayerScreen.kepler] Seek error:', e);
+        }
       }
-    }
-  }, [showControls]);
+    },
+    [showControls],
+  );
 
   /**
    * Toggle play/pause
@@ -243,13 +239,10 @@ export default function PlayerScreen() {
     const listener = RemoteControlManager.addKeydownListener(handleKeyDown);
 
     // Setup hardware back button listener
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        navigateBack();
-        return true;
-      },
-    );
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigateBack();
+      return true;
+    });
 
     return () => {
       RemoteControlManager.removeKeydownListener(listener);
@@ -277,10 +270,7 @@ export default function PlayerScreen() {
    * Handle surface view destruction
    */
   const onSurfaceViewDestroyed = useCallback((surfaceHandle: string) => {
-    logger.debug(
-      '[PlayerScreen.kepler] - Surface view destroyed:',
-      surfaceHandle,
-    );
+    logger.debug('[PlayerScreen.kepler] - Surface view destroyed:', surfaceHandle);
     if (videoRef.current) {
       videoRef.current.clearSurfaceHandle(surfaceHandle);
     }
@@ -303,10 +293,7 @@ export default function PlayerScreen() {
    * Handle caption view destruction
    */
   const onCaptionViewDestroyed = useCallback((captionHandle: string) => {
-    logger.debug(
-      '[PlayerScreen.kepler] - Caption view destroyed:',
-      captionHandle,
-    );
+    logger.debug('[PlayerScreen.kepler] - Caption view destroyed:', captionHandle);
     if (videoRef.current) {
       videoRef.current.clearCaptionViewHandle(captionHandle);
     }
