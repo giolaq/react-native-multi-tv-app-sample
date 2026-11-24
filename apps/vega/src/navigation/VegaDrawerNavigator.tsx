@@ -29,7 +29,7 @@ const SharedDrawerContent = CustomDrawerContent as unknown as (
 ) => ReactNode;
 
 // The logo lives in this app: Vega's Metro only serves assets under the project root.
-const drawerContent = (props: DrawerContentComponentProps) => (
+export const drawerContent = (props: DrawerContentComponentProps) => (
   <SharedDrawerContent
     {...props}
     profileImage={require('../assets/kepler.png')}
