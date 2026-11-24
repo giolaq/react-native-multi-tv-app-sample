@@ -1,6 +1,6 @@
 import { scaledPixels } from '../hooks/useScale';
 import { DrawerContentComponentProps, DrawerContentScrollView } from '@react-navigation/drawer';
-import { View, StyleSheet, Image, Platform, Text } from 'react-native';
+import { View, StyleSheet, Image, Text } from 'react-native';
 import { DefaultFocus, SpatialNavigationFocusableView, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { DrawerParamList } from '../navigation/types';
 import { useMenuContext } from '../components/MenuContext';
@@ -8,27 +8,30 @@ import { safeZones, Theme } from '../theme';
 import { useTheme } from '../components/AccessibilityContext';
 import { useCallback, useMemo } from 'react';
 import { Direction } from '@bam.tech/lrud';
-import { getCloseDrawerDirection } from '../utils/rtl';
+import { drawerPlatform } from './drawerPlatform';
+
+const drawerItems = [
+  { name: 'Home', label: 'Home' },
+  { name: 'Explore', label: 'Explore' },
+] as const;
 
 export default function CustomDrawerContent(props: DrawerContentComponentProps) {
   const navigation = props.navigation;
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
   const theme = useTheme();
   const styles = useMemo(() => createDrawerStyles(theme), [theme]);
-  const drawerItems = [
-    { name: 'Home', label: 'Home' },
-    { name: 'Explore', label: 'Explore' },
-  ] as const;
 
   const onDirectionHandledWithoutMovement = useCallback(
     (movement: Direction) => {
-      if (movement === getCloseDrawerDirection()) {
+      if (movement === drawerPlatform.getCloseDirection()) {
         navigation.closeDrawer();
         toggleMenu(false);
       }
     },
     [navigation, toggleMenu],
   );
+
+  const selectRoute = (route: keyof DrawerParamList) => drawerPlatform.selectRoute(navigation, route, toggleMenu);
 
   return (
     <SpatialNavigationRoot isActive={isMenuOpen} onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
@@ -39,60 +42,39 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           {...props}
           style={styles.container}
           scrollEnabled={false}
-          contentContainerStyle={{
-            ...(Platform.OS === 'ios' && Platform.isTV && { paddingStart: 0, paddingEnd: 0, paddingTop: 0 }),
-          }}
+          contentContainerStyle={drawerPlatform.contentContainerStyle}
         >
           <View style={styles.header}>
-            <Image source={require('../assets/images/logo.png')} style={styles.profilePic} />
-            <Text style={styles.userName}>Pioneer Tom</Text>
-            <Text style={styles.switchAccount}>Switch account</Text>
+            <Image source={drawerPlatform.profileImage} style={styles.profilePic} />
+            <Text style={styles.userName} numberOfLines={drawerPlatform.labelLines}>
+              Pioneer Tom
+            </Text>
+            <Text style={styles.switchAccount} numberOfLines={drawerPlatform.labelLines}>
+              Switch account
+            </Text>
           </View>
-          {drawerItems.map((item, index) =>
-            index === 0 ? (
-              <DefaultFocus key={index}>
-                <SpatialNavigationFocusableView
-                  onSelect={() => {
-                    navigation.jumpTo(item.name as keyof DrawerParamList);
-                    navigation.closeDrawer();
-                    toggleMenu(false);
-                  }}
-                >
-                  {({ isFocused }) => (
-                    <View style={[styles.menuItem, isFocused && styles.menuItemFocused]}>
-                      <Text style={[styles.menuText, isFocused && styles.menuTextFocused]}>{item.label}</Text>
-                    </View>
-                  )}
-                </SpatialNavigationFocusableView>
-              </DefaultFocus>
-            ) : (
-              <SpatialNavigationFocusableView
-                key={index}
-                onSelect={() => {
-                  navigation.jumpTo(item.name as keyof DrawerParamList);
-                  navigation.closeDrawer();
-                  toggleMenu(false);
-                }}
-              >
+          {drawerItems.map((item, index) => {
+            const menuItem = (
+              <SpatialNavigationFocusableView key={item.name} onSelect={() => selectRoute(item.name)}>
                 {({ isFocused }) => (
                   <View style={[styles.menuItem, isFocused && styles.menuItemFocused]}>
-                    <Text style={[styles.menuText, isFocused && styles.menuTextFocused]}>{item.label}</Text>
+                    <Text
+                      style={[styles.menuText, isFocused && styles.menuTextFocused]}
+                      numberOfLines={drawerPlatform.labelLines}
+                    >
+                      {item.label}
+                    </Text>
                   </View>
                 )}
               </SpatialNavigationFocusableView>
-            ),
-          )}
+            );
+            return index === 0 ? <DefaultFocus key={item.name}>{menuItem}</DefaultFocus> : menuItem;
+          })}
         </DrawerContentScrollView>
 
         {/* Settings button at bottom */}
         <View style={styles.footer}>
-          <SpatialNavigationFocusableView
-            onSelect={() => {
-              navigation.jumpTo('Settings');
-              navigation.closeDrawer();
-              toggleMenu(false);
-            }}
-          >
+          <SpatialNavigationFocusableView onSelect={() => selectRoute('Settings')}>
             {({ isFocused }) => (
               <View style={[styles.settingsButton, isFocused && styles.settingsButtonFocused]}>
                 <View style={styles.cogIcon}>
@@ -127,7 +109,7 @@ const createDrawerStyles = ({ colors, fontSize, focus }: Theme) =>
       paddingTop: scaledPixels(safeZones.titleSafe.vertical),
     },
     header: {
-      paddingHorizontal: scaledPixels(safeZones.actionSafe.horizontal),
+      paddingHorizontal: scaledPixels(drawerPlatform.headerPaddingHorizontal),
       paddingVertical: scaledPixels(24),
       marginBottom: scaledPixels(16),
     },
@@ -137,6 +119,7 @@ const createDrawerStyles = ({ colors, fontSize, focus }: Theme) =>
       borderRadius: scaledPixels(24),
       borderWidth: scaledPixels(4),
       borderColor: colors.border,
+      resizeMode: drawerPlatform.profileImageResizeMode,
     },
     userName: {
       color: colors.text,

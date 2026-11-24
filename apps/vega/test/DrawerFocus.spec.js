@@ -3,11 +3,19 @@
 import React from 'react';
 import {I18nManager, Image, Text} from 'react-native';
 import {act, create} from 'react-test-renderer';
-import {SpatialNavigation, SpatialNavigationRoot, SpatialNavigationFocusableView, DefaultFocus} from 'react-tv-space-navigation';
-import {MenuProvider, useMenuContext} from '../../../packages/shared-ui/src/components/MenuContext';
-import VegaCustomDrawerContent from '../src/components/VegaCustomDrawerContent';
+import {
+  SpatialNavigation,
+  SpatialNavigationRoot,
+  SpatialNavigationFocusableView,
+  DefaultFocus,
+} from 'react-tv-space-navigation';
+import {
+  MenuProvider,
+  useMenuContext,
+} from '../../../packages/shared-ui/src/components/MenuContext';
+import CustomDrawerContent from '../../../packages/shared-ui/src/components/CustomDrawerContent';
 
-const LOGO = require('../src/assets/kepler.png');
+const LOGO = require('../../../packages/shared-ui/src/assets/images/kepler.png');
 
 const mockNavigation = {
   closeDrawer: jest.fn(),
@@ -20,39 +28,46 @@ jest.mock('@amazon-devices/react-navigation__native', () => ({
 jest.mock('@amazon-devices/react-navigation__drawer', () => ({
   DrawerContentScrollView: require('react-native').View,
 }));
-jest.mock('@multi-tv/shared-ui', () => ({
-  ...require('../../../packages/shared-ui/src/components/MenuContext'),
-  scaledPixels: value => value,
-  colors: {},
-  useTheme: () => require('../../../packages/shared-ui/src/theme/accessibility').getDefaultTheme(),
-  safeZones: {titleSafe: {vertical: 0}, actionSafe: {horizontal: 0}},
-}), {virtual: true});
+jest.mock('../../../packages/shared-ui/src/hooks/useScale', () => ({
+  scaledPixels: (value) => value,
+}));
 
 function Content({onSelect}) {
   const {isOpen} = useMenuContext();
-  return <SpatialNavigationRoot isActive={!isOpen}>
-    <DefaultFocus><SpatialNavigationFocusableView onSelect={onSelect}>
-      {() => <Text>Content item</Text>}
-    </SpatialNavigationFocusableView></DefaultFocus>
-  </SpatialNavigationRoot>;
+  return (
+    <SpatialNavigationRoot isActive={!isOpen}>
+      <DefaultFocus>
+        <SpatialNavigationFocusableView onSelect={onSelect}>
+          {() => <Text>Content item</Text>}
+        </SpatialNavigationFocusableView>
+      </DefaultFocus>
+    </SpatialNavigationRoot>
+  );
 }
 
 async function mountDrawer() {
   const listeners = new Set();
   SpatialNavigation.configureRemoteControl({
-    remoteControlSubscriber: callback => { listeners.add(callback); return callback; },
-    remoteControlUnsubscriber: callback => listeners.delete(callback),
+    remoteControlSubscriber: (callback) => {
+      listeners.add(callback);
+      return callback;
+    },
+    remoteControlUnsubscriber: (callback) => listeners.delete(callback),
   });
   const onSelect = jest.fn();
   let tree;
   await act(async () => {
-    tree = create(<MenuProvider>
-      <VegaCustomDrawerContent navigation={mockNavigation} />
-      <Content onSelect={onSelect} />
-    </MenuProvider>);
+    tree = create(
+      <MenuProvider>
+        <CustomDrawerContent navigation={mockNavigation} />
+        <Content onSelect={onSelect} />
+      </MenuProvider>,
+    );
   });
-  const press = async direction => {
-    await act(async () => { [...listeners].forEach(listener => listener(direction)); });
+  const press = async (direction) => {
+    await act(async () => {
+      [...listeners].forEach((listener) => listener(direction));
+    });
   };
   return {tree, press, onSelect};
 }
@@ -62,7 +77,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('Vega drawer focus handoff', () => {
+describe('shared drawer on Vega', () => {
   it('closes the focused drawer on Right and routes Enter to the content', async () => {
     const {tree, press, onSelect} = await mountDrawer();
     try {
@@ -124,9 +139,13 @@ describe('Vega drawer focus handoff', () => {
     try {
       const labels = tree.root
         .findAllByType(Text)
-        .filter(node => ['Home', 'Explore', 'Pioneer Tom', 'Switch account'].includes(String(node.props.children)));
+        .filter((node) =>
+          ['Home', 'Explore', 'Pioneer Tom', 'Switch account'].includes(
+            String(node.props.children),
+          ),
+        );
       expect(labels).toHaveLength(4);
-      labels.forEach(label => expect(label.props.numberOfLines).toBe(1));
+      labels.forEach((label) => expect(label.props.numberOfLines).toBe(1));
       const logo = tree.root.findByType(Image);
       expect(logo.props.source).toBe(LOGO);
       expect(logo.props.style.resizeMode).toBe('contain');
@@ -138,8 +157,13 @@ describe('Vega drawer focus handoff', () => {
   it('drops the drawer scroll view start and end padding and keeps the 24 unit header inset', async () => {
     const {tree} = await mountDrawer();
     try {
-      const scroll = tree.root.findAll(node => node.props.scrollEnabled === false)[0];
-      expect(scroll.props.contentContainerStyle).toEqual({paddingStart: 0, paddingEnd: 0});
+      const scroll = tree.root.findAll(
+        (node) => node.props.scrollEnabled === false,
+      )[0];
+      expect(scroll.props.contentContainerStyle).toEqual({
+        paddingStart: 0,
+        paddingEnd: 0,
+      });
       const header = tree.root.findByType(Image).parent;
       expect(header.props.style.paddingHorizontal).toBe(24);
     } finally {

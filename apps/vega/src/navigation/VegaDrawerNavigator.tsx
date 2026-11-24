@@ -1,11 +1,15 @@
-import {useEffect} from 'react';
+import {useEffect, type ReactNode} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {createDrawerNavigator} from '@amazon-devices/react-navigation__drawer';
+import {
+  createDrawerNavigator,
+  type DrawerContentComponentProps,
+} from '@amazon-devices/react-navigation__drawer';
 import {
   useNavigation,
   DrawerActions,
 } from '@amazon-devices/react-navigation__native';
 import {
+  CustomDrawerContent,
   useMenuContext,
   useTheme,
   scaledPixels,
@@ -14,10 +18,15 @@ import {
   TVScreen,
   SettingsScreen,
 } from '@multi-tv/shared-ui';
-import VegaCustomDrawerContent from '../components/VegaCustomDrawerContent';
 import {DrawerParamList} from './types';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
+
+// shared-ui types its drawer props from @react-navigation/drawer, a separate type copy
+// from the Amazon port that Metro substitutes at runtime.
+const drawerContent = CustomDrawerContent as unknown as (
+  props: DrawerContentComponentProps,
+) => ReactNode;
 
 function DrawerSyncWrapper() {
   const {isOpen: isMenuOpen} = useMenuContext();
@@ -39,7 +48,7 @@ export default function VegaDrawerNavigator() {
   return (
     <View style={{flex: 1}}>
       <Drawer.Navigator
-        drawerContent={VegaCustomDrawerContent}
+        drawerContent={drawerContent}
         initialRouteName="Home"
         defaultStatus="open"
         screenOptions={{

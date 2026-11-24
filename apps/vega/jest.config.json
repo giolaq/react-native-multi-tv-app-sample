@@ -8,7 +8,16 @@
     "<rootDir>/node_modules/@amazon-devices/react-native-gesture-handler/jestSetup.js"
   ],
   "testRegex": "/test/.*\\.(test|spec)\\.(ts|tsx|js)$",
-  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "moduleFileExtensions": [
+    "vega.ts",
+    "vega.tsx",
+    "ts",
+    "tsx",
+    "js",
+    "jsx",
+    "json",
+    "node"
+  ],
   "moduleNameMapper": {
     "^~/(.*)$": "<rootDir>/src/$1",
     "^(react|react-native|react-tv-space-navigation)$": "<rootDir>/node_modules/$1",

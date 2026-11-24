@@ -44,7 +44,7 @@ async function mountDrawer() {
   await act(async () => {
     tree = TestRenderer.create(
       <MenuProvider>
-        <CustomDrawerContent {...({ navigation } as never)} />
+        <CustomDrawerContent {...({ navigation } as unknown as React.ComponentProps<typeof CustomDrawerContent>)} />
         <Content onSelect={onSelect} />
       </MenuProvider>,
     );
