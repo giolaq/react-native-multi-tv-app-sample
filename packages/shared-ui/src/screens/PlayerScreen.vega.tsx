@@ -96,7 +96,7 @@ export default function PlayerScreen() {
           currentTimeRef.current = clampedTime;
           showControls();
         } catch (e) {
-          logger.warn('[PlayerScreen.kepler] Seek error:', e);
+          logger.error('[PlayerScreen.kepler] Seek error:', e);
         }
       }
     },
@@ -118,7 +118,7 @@ export default function PlayerScreen() {
         }
         showControls();
       } catch (e) {
-        logger.warn('[PlayerScreen.kepler] Play/pause error:', e);
+        logger.error('[PlayerScreen.kepler] Play/pause error:', e);
       }
     }
   }, [showControls]);
