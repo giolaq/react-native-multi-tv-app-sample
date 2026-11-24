@@ -42,6 +42,7 @@ module.exports = [
     files: ['packages/shared-ui/src/**/*.ts', 'packages/shared-ui/src/**/*.tsx'],
     rules: {
       'no-console': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
     },
   },
   {

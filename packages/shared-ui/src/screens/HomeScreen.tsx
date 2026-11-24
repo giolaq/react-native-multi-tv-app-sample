@@ -25,20 +25,22 @@ import { logger } from '../utils/logger';
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawerNavigator'>;
 
 // Memoized MovieItem component to prevent unnecessary re-renders and optimize image source
-const MovieItem = React.memo(({ item, isFocused, styles }: { item: CardData; isFocused: boolean; styles: any }) => {
-  const imageSource = useMemo(() => ({ uri: item.headerImage }), [item.headerImage]);
+const MovieItem = React.memo(
+  ({ item, isFocused, styles }: { item: CardData; isFocused: boolean; styles: typeof gridStyles }) => {
+    const imageSource = useMemo(() => ({ uri: item.headerImage }), [item.headerImage]);
 
-  return (
-    <View style={[styles.highlightThumbnail, isFocused && styles.highlightThumbnailFocused]}>
-      <Image
-        source={imageSource}
-        style={styles.cardImage}
-        resizeMode="cover"
-        onError={(error) => logger.debug('Image load error:', item.title, error.nativeEvent.error)}
-      />
-    </View>
-  );
-});
+    return (
+      <View style={[styles.highlightThumbnail, isFocused && styles.highlightThumbnailFocused]}>
+        <Image
+          source={imageSource}
+          style={styles.cardImage}
+          resizeMode="cover"
+          onError={(error) => logger.debug('Image load error:', item.title, error.nativeEvent.error)}
+        />
+      </View>
+    );
+  },
+);
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
