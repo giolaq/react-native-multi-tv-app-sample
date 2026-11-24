@@ -46,7 +46,7 @@ export default function ExploreScreen() {
         {movies?.length ? (
           <SpatialNavigationScrollView style={styles.list} contentContainerStyle={styles.rows}>
             {movies.map((item, index) => {
-              const openDetails = () => navigation.navigate('Details', item);
+              const openDetails = () => navigation.navigate('Details', { id: item.id });
               return (
                 <DefaultFocus key={item.id} enable={index === 0}>
                   <SpatialNavigationFocusableView onSelect={openDetails}>

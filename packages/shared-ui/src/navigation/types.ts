@@ -1,22 +1,11 @@
+import type { CardData } from '../data/moviesData';
+
+export type MovieRouteParams = { id: CardData['id'] };
+
 export type RootStackParamList = {
   DrawerNavigator: undefined;
-  Details: {
-    title: string;
-    description: string;
-    headerImage: string;
-    movie: string;
-    category?: string;
-    genres?: string[];
-    releaseYear?: number;
-    rating?: number;
-    ratingCount?: number;
-    contentRating?: string;
-    duration?: number;
-  };
-  Player: {
-    movie: string;
-    headerImage: string;
-  };
+  Details: MovieRouteParams;
+  Player: MovieRouteParams;
 };
 
 export type DrawerParamList = {

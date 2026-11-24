@@ -105,19 +105,7 @@ export default function HomeScreen() {
     ({ item, index }: { item: CardData; index: number }) => (
       <SpatialNavigationFocusableView
         onSelect={() => {
-          navigation.navigate('Details', {
-            title: item.title,
-            description: item.description,
-            headerImage: item.headerImage,
-            movie: item.movie,
-            category: item.category,
-            genres: item.genres,
-            releaseYear: item.releaseYear,
-            rating: item.rating,
-            ratingCount: item.ratingCount,
-            contentRating: item.contentRating,
-            duration: item.duration,
-          });
+          navigation.navigate('Details', { id: item.id });
         }}
         onFocus={() => setFocusedCard({ item, indexInRow: index })}
       >

@@ -12,8 +12,11 @@ jest.mock('react-native', () => ({
   View: 'View',
 }));
 jest.mock('react-tv-space-navigation', () => ({ SpatialNavigationRoot: 'SpatialNavigationRoot' }));
+jest.mock('../../../packages/shared-ui/src/hooks/useMovie', () => ({
+  useMovie: () => ({ status: 'found', movie: { id: 'm', movie: 'movie', headerImage: 'poster' } }),
+}));
 jest.mock('@react-navigation/native', () => ({
-  useRoute: () => ({ params: { movie: 'movie', headerImage: 'poster' } }),
+  useRoute: () => ({ params: { id: 'm' } }),
   useNavigation: () => ({}),
   useIsFocused: () => true,
 }));

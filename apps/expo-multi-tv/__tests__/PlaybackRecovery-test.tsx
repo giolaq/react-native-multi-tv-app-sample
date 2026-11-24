@@ -3,10 +3,13 @@ import TestRenderer, { act } from 'react-test-renderer';
 import PlayerScreen from '../../../packages/shared-ui/src/screens/PlayerScreen';
 
 const mockGoBack = jest.fn();
+jest.mock('../../../packages/shared-ui/src/hooks/useMovie', () => ({
+  useMovie: () => ({ status: 'found', movie: { id: 'm', movie: 'unavailable.mp4', headerImage: 'poster' } }),
+}));
 jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => true,
   useNavigation: () => ({ goBack: mockGoBack }),
-  useRoute: () => ({ params: { movie: 'unavailable.mp4', headerImage: 'poster' } }),
+  useRoute: () => ({ params: { id: 'm' } }),
 }));
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
