@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DrawerActions, useIsFocused } from '@react-navigation/native';
+import { useTheme } from '../components/AccessibilityContext';
 import { useMenuContext } from '../components/MenuContext';
 import {
   SpatialNavigationFocusableView,
@@ -19,16 +20,20 @@ import { CardData } from '../data/moviesData';
 import { selectHomeRows } from '../data/homeRows';
 import { Catalog, useCatalog } from '../hooks/useCatalog';
 import FocusablePressable from '../components/FocusablePressable';
-import { colors, safeZones } from '../theme';
+import { safeZones, Theme } from '../theme';
 import PlatformLinearGradient from '../components/PlatformLinearGradient';
 import { getOpenDrawerDirection } from '../utils/rtl';
 import { logger } from '../utils/logger';
 
+const standardScrim = ['rgba(0,0,0,0.9)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)', 'transparent'];
+const highContrastScrim = ['rgba(0,0,0,0.97)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,0.6)', 'transparent'];
+
+type HomeStyles = ReturnType<typeof createStyles>;
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawerNavigator'>;
 
 // Memoized MovieItem component to prevent unnecessary re-renders and optimize image source
 const MovieItem = React.memo(
-  ({ item, isFocused, styles }: { item: CardData; isFocused: boolean; styles: typeof gridStyles }) => {
+  ({ item, isFocused, styles }: { item: CardData; isFocused: boolean; styles: HomeStyles }) => {
     const imageSource = useMemo(() => ({ uri: item.headerImage }), [item.headerImage]);
 
     return (
@@ -46,6 +51,8 @@ const MovieItem = React.memo(
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
   const [focusedCard, setFocusedCard] = useState<{ item: CardData; indexInRow: number } | null>(null);
   const catalog = useCatalog();
@@ -65,24 +72,24 @@ export default function HomeScreen() {
     if (!focusedItem) return null;
 
     return (
-      <View style={gridStyles.header}>
-        <Image style={gridStyles.headerImage} source={headerImageSource} resizeMode="cover" />
+      <View style={styles.header}>
+        <Image style={styles.headerImage} source={headerImageSource} resizeMode="cover" />
         {/* Linear gradient scrim for left overlay */}
         <PlatformLinearGradient
-          colors={['rgba(0,0,0,0.9)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)', 'transparent']}
+          colors={theme.preferences.highContrast ? highContrastScrim : standardScrim}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={gridStyles.gradientLeft}
+          style={styles.gradientLeft}
         />
-        <View style={gridStyles.headerTextContainer}>
-          <Text style={gridStyles.headerTitle}>{focusedItem.title}</Text>
-          <Text style={gridStyles.headerDescription} numberOfLines={3}>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>{focusedItem.title}</Text>
+          <Text style={styles.headerDescription} numberOfLines={3}>
             {focusedItem.description}
           </Text>
         </View>
       </View>
     );
-  }, [headerImageSource, focusedItem]);
+  }, [headerImageSource, focusedItem, styles, theme.preferences.highContrast]);
 
   const onDirectionHandledWithoutMovement = useCallback(
     (movement: Direction) => {
@@ -114,24 +121,24 @@ export default function HomeScreen() {
         }}
         onFocus={() => setFocusedCard({ item, indexInRow: index })}
       >
-        {({ isFocused }) => <MovieItem item={item} isFocused={isFocused} styles={gridStyles} />}
+        {({ isFocused }) => <MovieItem item={item} isFocused={isFocused} styles={styles} />}
       </SpatialNavigationFocusableView>
     ),
-    [navigation],
+    [navigation, styles],
   );
 
   return (
     <SpatialNavigationRoot isActive={isActive} onDirectionHandledWithoutMovement={onDirectionHandledWithoutMovement}>
-      <View style={gridStyles.container}>
+      <View style={styles.container}>
         {rows.length === 0 ? (
-          <CatalogStatus catalog={catalog} />
+          <CatalogStatus catalog={catalog} styles={styles} />
         ) : (
           <>
             {renderHeader()}
-            <SpatialNavigationScrollView offsetFromStart={scaledPixels(60)} style={gridStyles.scrollContent}>
+            <SpatialNavigationScrollView offsetFromStart={scaledPixels(60)} style={styles.scrollContent}>
               {rows.map((row) => (
-                <View key={row.key} style={gridStyles.highlightsContainer}>
-                  <Text style={gridStyles.highlightsTitle}>{row.title}</Text>
+                <View key={row.key} style={styles.highlightsContainer}>
+                  <Text style={styles.highlightsTitle}>{row.title}</Text>
                   <SpatialNavigationNode>
                     <DefaultFocus>
                       <SpatialNavigationVirtualizedList
@@ -159,10 +166,10 @@ const statusMessages: Record<Catalog['status'], string> = {
   loaded: 'No movies are available.',
 };
 
-function CatalogStatus({ catalog }: { catalog: Catalog }) {
+function CatalogStatus({ catalog, styles }: { catalog: Catalog; styles: HomeStyles }) {
   return (
-    <View style={gridStyles.status}>
-      <Text accessibilityLiveRegion="polite" style={gridStyles.statusText}>
+    <View style={styles.status}>
+      <Text accessibilityLiveRegion="polite" style={styles.statusText}>
         {statusMessages[catalog.status]}
       </Text>
       {catalog.status === 'failed' ? (
@@ -174,136 +181,112 @@ function CatalogStatus({ catalog }: { catalog: Catalog }) {
   );
 }
 
-const gridStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  status: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: scaledPixels(24),
-  },
-  statusText: {
-    color: colors.text,
-    fontSize: scaledPixels(24),
-  },
-  scrollContent: {
-    flex: 1,
-    marginBottom: scaledPixels(safeZones.actionSafe.vertical),
-  },
-  highlightsTitle: {
-    color: colors.text,
-    fontSize: scaledPixels(40),
-    fontWeight: 'bold',
-    marginBottom: scaledPixels(16),
-    marginTop: scaledPixels(20),
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  headerTitle: {
-    color: colors.text,
-    fontSize: scaledPixels(56),
-    fontWeight: 'bold',
-    marginBottom: scaledPixels(16),
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 12,
-  },
-  headerDescription: {
-    color: colors.text,
-    fontSize: scaledPixels(28),
-    fontWeight: '500',
-    lineHeight: scaledPixels(40),
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  thumbnailTextContainer: {
-    position: 'absolute',
-    bottom: 0,
-    start: 0,
-    end: 0,
-    backgroundColor: colors.scrimDark,
-    paddingHorizontal: scaledPixels(16),
-    paddingVertical: scaledPixels(12),
-    borderBottomStartRadius: scaledPixels(8),
-    borderBottomEndRadius: scaledPixels(8),
-  },
-  thumbnailText: {
-    color: colors.text,
-    fontSize: scaledPixels(24),
-    fontWeight: '600',
-    textAlign: 'center',
-    lineHeight: scaledPixels(32),
-  },
-  highlightThumbnail: {
-    width: scaledPixels(420),
-    height: scaledPixels(260),
-    marginEnd: scaledPixels(20),
-    backgroundColor: colors.card,
-    borderRadius: scaledPixels(12),
-    borderWidth: scaledPixels(5),
-    borderColor: 'transparent',
-    overflow: 'hidden',
-  },
-  highlightThumbnailFocused: {
-    borderColor: colors.focusBorder,
-    borderWidth: scaledPixels(6),
-    transform: [{ scale: 1.1 }],
-    shadowColor: colors.focus,
-    shadowOffset: {
-      width: 0,
-      height: 0,
+const createStyles = ({ colors, fontSize, focus }: Theme) => {
+  // The ring is never thinner than the 6px focused border the cards always had.
+  const ringWidth = Math.max(focus.borderWidth, scaledPixels(6));
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 0.9,
-    shadowRadius: scaledPixels(20),
-    elevation: 15,
-  },
-  highlightsContainer: {
-    paddingHorizontal: scaledPixels(safeZones.actionSafe.horizontal),
-    paddingVertical: scaledPixels(16),
-    height: scaledPixels(400),
-  },
-  thumbnailPlaceholder: {
-    backgroundColor: colors.cardElevated,
-    width: '100%',
-    height: '100%',
-    borderRadius: scaledPixels(8),
-  },
-  header: {
-    width: '100%',
-    height: scaledPixels(700),
-    position: 'relative',
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  gradientLeft: {
-    position: 'absolute',
-    start: 0,
-    top: 0,
-    bottom: 0,
-    width: '65%',
-  },
-  headerTextContainer: {
-    position: 'absolute',
-    start: scaledPixels(safeZones.titleSafe.horizontal),
-    top: scaledPixels(safeZones.titleSafe.vertical),
-    bottom: scaledPixels(safeZones.titleSafe.vertical),
-    justifyContent: 'center',
-    width: '55%',
-  },
-  highlightsList: {
-    paddingStart: scaledPixels(20),
-  },
-  cardImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: scaledPixels(8),
-  },
-});
+    status: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: scaledPixels(24),
+    },
+    statusText: {
+      color: colors.text,
+      fontSize: fontSize(24),
+    },
+    scrollContent: {
+      flex: 1,
+      marginBottom: scaledPixels(safeZones.actionSafe.vertical),
+    },
+    highlightsTitle: {
+      color: colors.text,
+      fontSize: fontSize(40),
+      fontWeight: 'bold',
+      marginBottom: scaledPixels(16),
+      marginTop: scaledPixels(20),
+      textShadowColor: 'rgba(0, 0, 0, 0.9)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 8,
+    },
+    headerTitle: {
+      color: colors.text,
+      fontSize: fontSize(56),
+      fontWeight: 'bold',
+      marginBottom: scaledPixels(16),
+      textShadowColor: 'rgba(0, 0, 0, 0.9)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 12,
+    },
+    headerDescription: {
+      color: colors.text,
+      fontSize: fontSize(28),
+      fontWeight: '500',
+      lineHeight: fontSize(40),
+      textShadowColor: 'rgba(0, 0, 0, 0.9)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 8,
+    },
+    highlightThumbnail: {
+      width: scaledPixels(420),
+      height: scaledPixels(260),
+      marginEnd: scaledPixels(20),
+      backgroundColor: colors.card,
+      borderRadius: scaledPixels(12),
+      borderWidth: ringWidth,
+      borderColor: focus.restingBorderColor,
+      overflow: 'hidden',
+    },
+    highlightThumbnailFocused: {
+      borderColor: focus.borderColor,
+      transform: [{ scale: focus.scale > 1 ? 1.1 : 1 }],
+      shadowColor: colors.focus,
+      shadowOffset: {
+        width: 0,
+        height: 0,
+      },
+      shadowOpacity: 0.9,
+      shadowRadius: scaledPixels(20),
+      elevation: 15,
+    },
+    highlightsContainer: {
+      paddingHorizontal: scaledPixels(safeZones.actionSafe.horizontal),
+      paddingVertical: scaledPixels(16),
+      height: scaledPixels(400),
+    },
+    header: {
+      width: '100%',
+      height: scaledPixels(700),
+      position: 'relative',
+    },
+    headerImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    gradientLeft: {
+      position: 'absolute',
+      start: 0,
+      top: 0,
+      bottom: 0,
+      width: '65%',
+    },
+    headerTextContainer: {
+      position: 'absolute',
+      start: scaledPixels(safeZones.titleSafe.horizontal),
+      top: scaledPixels(safeZones.titleSafe.vertical),
+      bottom: scaledPixels(safeZones.titleSafe.vertical),
+      justifyContent: 'center',
+      width: '55%',
+    },
+    cardImage: {
+      width: '100%',
+      height: '100%',
+      borderRadius: scaledPixels(8),
+    },
+  });
+};
