@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, BackHandler } from 'react-native';
-import { SpatialNavigationRoot } from 'react-tv-space-navigation';
+import { Text, View, StyleSheet, BackHandler } from 'react-native';
+import { DefaultFocus, SpatialNavigationNode, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,7 +9,7 @@ import { VideoPlayer as W3CVideoPlayer } from '@amazon-devices/react-native-w3cm
 import RemoteControlManager from '../app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../app/remote-control/SupportedKeys';
 import VideoOverlay from '../components/player/VideoOverlay.vega';
-import ExitButton from '../components/player/ExitButton';
+import FocusablePressable from '../components/FocusablePressable';
 import VideoPlayer from '../components/player/VideoPlayer.vega';
 import MovieLookupStatus from '../components/MovieLookupStatus';
 import type { CardData } from '../data/moviesData';
@@ -61,6 +61,8 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
   const [isVideoError, setIsVideoError] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  // Retry increments this so the setup effect tears down the failed handler and builds a new one.
+  const [playbackAttempt, setPlaybackAttempt] = useState<number>(0);
 
   // Refs
   const videoRef = useRef<W3CVideoPlayer | null>(null);
@@ -195,7 +197,7 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
       videoRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [movie, headerImage, isFocused]);
+  }, [movie, headerImage, isFocused, playbackAttempt]);
 
   /**
    * Handle video end - pause, show controls, and navigate back
@@ -311,15 +313,40 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
     captionViewHandleRef.current = null;
   }, []);
 
+  /**
+   * Start the stream again from the beginning after a playback error
+   */
+  const retryPlayback = useCallback(() => {
+    currentTimeRef.current = 0;
+    durationRef.current = 0;
+    setCurrentTime(0);
+    setDuration(0);
+    setPaused(false);
+    setControlsVisible(false);
+    setIsVideoBuffering(true);
+    setIsVideoInitialized(false);
+    setIsVideoEnded(false);
+    setIsVideoError(false);
+    setPlaybackAttempt((attempt) => attempt + 1);
+  }, []);
+
   const styles = usePlayerStyles();
 
   if (isVideoError) {
     return (
       <SpatialNavigationRoot isActive={isFocused}>
-        <View style={styles.container}>
-          <View style={styles.errorContainer}>
-            <ExitButton onSelect={navigateBack} />
-          </View>
+        <View style={[styles.container, styles.errorPanel]}>
+          <Text accessibilityRole="alert" style={styles.errorText}>
+            Unable to play this video.
+          </Text>
+          <SpatialNavigationNode orientation="vertical">
+            <View style={styles.errorActions}>
+              <DefaultFocus>
+                <FocusablePressable text="Retry" onSelect={retryPlayback} />
+              </DefaultFocus>
+              <FocusablePressable text="Back" onSelect={navigateBack} />
+            </View>
+          </SpatialNavigationNode>
         </View>
       </SpatialNavigationRoot>
     );
@@ -363,12 +390,8 @@ const usePlayerStyles = () => {
       flex: 1,
       backgroundColor: '#000',
     },
-    errorContainer: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: '#000',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 10,
-    },
+    errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
+    errorActions: { gap: 20 },
+    errorText: { fontSize: 32, color: 'white' },
   });
 };
