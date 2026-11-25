@@ -9,6 +9,7 @@ import FocusablePressable from '../components/FocusablePressable';
 import MovieLookupStatus from '../components/MovieLookupStatus';
 import type { CardData } from '../data/moviesData';
 import { useMovie } from '../hooks/useMovie';
+import { usePlaybackPosition } from '../components/PlaybackPositionContext';
 import { RootStackParamList } from '../navigation/types';
 import { safeZones, Theme } from '../theme';
 import { useTheme } from '../components/AccessibilityContext';
@@ -51,8 +52,12 @@ function MovieDetails({ movie }: { movie: CardData }) {
     return `${rating.toFixed(1)} ⭐ (${ratingCount || 0} ratings)`;
   }, [rating, ratingCount]);
 
+  const resumeTime = usePlaybackPosition(id);
   const navigate = useCallback(() => {
-    navigation.navigate('Player', { id });
+    navigation.navigate('Player', resumeTime ? { id, startTime: resumeTime } : { id });
+  }, [navigation, id, resumeTime]);
+  const startOver = useCallback(() => {
+    navigation.navigate('Player', { id, startTime: 0 });
   }, [navigation, id]);
 
   return (
@@ -99,9 +104,17 @@ function MovieDetails({ movie }: { movie: CardData }) {
                 <Text style={detailsStyles.crewName}>Eric Fahsl</Text>
               </View>
             </View>
-            <DefaultFocus>
-              <FocusablePressable text={'Watch now'} onSelect={navigate} style={buttonStyle} />
-            </DefaultFocus>
+            <View style={detailsStyles.actions}>
+              {/* One button that changes label, so focus stays on it when a position appears. */}
+              <DefaultFocus>
+                <FocusablePressable
+                  text={resumeTime ? 'Resume' : 'Watch now'}
+                  onSelect={navigate}
+                  style={buttonStyle}
+                />
+              </DefaultFocus>
+              {!!resumeTime && <FocusablePressable text="Start over" onSelect={startOver} style={buttonStyle} />}
+            </View>
           </View>
         </View>
       </View>
@@ -134,6 +147,9 @@ const createDetailsStyles = ({ colors, fontSize, backdropOpacity }: Theme) =>
     },
     bottomContent: {
       paddingBottom: scaledPixels(20),
+    },
+    actions: {
+      gap: scaledPixels(20),
     },
     title: {
       fontSize: fontSize(64),

@@ -71,6 +71,9 @@ export class VideoHandler {
   /** Updates buffering indicator visibility */
   public setShowBuffering: React.Dispatch<React.SetStateAction<boolean>>;
 
+  /** Where playback starts once the metadata loads, in seconds */
+  public startTime: number;
+
   /**
    * Constructor - Initializes the VideoHandler with required dependencies
    */
@@ -84,6 +87,7 @@ export class VideoHandler {
     setCurrentTime: React.Dispatch<React.SetStateAction<number>>,
     setDuration: React.Dispatch<React.SetStateAction<number>>,
     setShowBuffering: React.Dispatch<React.SetStateAction<boolean>>,
+    startTime: number = 0,
   ) {
     this.videoRef = videoRef;
     this.videoUri = videoUri;
@@ -95,6 +99,7 @@ export class VideoHandler {
     this.setCurrentTime = setCurrentTime;
     this.setDuration = setDuration;
     this.setShowBuffering = setShowBuffering;
+    this.startTime = startTime;
   }
 
   /**
@@ -204,6 +209,10 @@ export class VideoHandler {
     if (this.videoRef.current) {
       logger.debug('[VideoHandler] - onLoadedMetadata');
       const duration = this.videoRef.current.duration || 0;
+      if (this.startTime > 0 && this.startTime < duration) {
+        this.videoRef.current.currentTime = this.startTime;
+        this.setCurrentTime(this.startTime);
+      }
       this.setDuration(duration);
       this.setIsVideoInitialized(true);
     }
@@ -215,6 +224,7 @@ export class VideoHandler {
   onEnded = () => {
     if (this.videoRef.current?.ended) {
       logger.debug('[VideoHandler] - onEnded');
+      this.setCurrentTime(this.videoRef.current.duration || this.videoRef.current.currentTime || 0);
       this.setIsVideoEnded(true);
     }
   };

@@ -14,6 +14,7 @@ import VideoPlayer from '../components/player/VideoPlayer.vega';
 import MovieLookupStatus from '../components/MovieLookupStatus';
 import type { CardData } from '../data/moviesData';
 import { useMovie } from '../hooks/useMovie';
+import { useSavePlaybackPosition } from '../components/PlaybackPositionContext';
 import { RootStackParamList } from '../navigation/types';
 import { VideoHandler } from '../utils/VideoHandler.kepler';
 import { logger } from '../utils/logger';
@@ -35,16 +36,18 @@ type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 
  * - Handles Fire TV remote control events
  */
 export default function PlayerScreen() {
-  const { id } = useRoute<PlayerScreenRouteProp>().params;
+  const { id, startTime = 0 } = useRoute<PlayerScreenRouteProp>().params;
   const lookup = useMovie(id);
   return lookup.status === 'found' ? (
-    <MoviePlayer movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
+    <MoviePlayer id={id} startTime={startTime} movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
   ) : (
     <MovieLookupStatus lookup={lookup} />
   );
 }
 
-function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerImage'>) {
+type MoviePlayerProps = Pick<CardData, 'id' | 'movie' | 'headerImage'> & { startTime: number };
+
+function MoviePlayer({ id, startTime, movie, headerImage }: MoviePlayerProps) {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
   const isFocused = useIsFocused();
 
@@ -70,6 +73,7 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
   const currentTimeRef = useRef<number>(0);
   const durationRef = useRef<number>(0);
   const videoHandlerRef = useRef<VideoHandler | null>(null);
+  useSavePlaybackPosition(id, currentTimeRef, durationRef, isFocused);
 
   // Update refs when state changes
   useEffect(() => {
@@ -177,6 +181,7 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
       setCurrentTime,
       setDuration,
       setIsVideoBuffering,
+      startTime,
     );
 
     // Start pre-buffering video
