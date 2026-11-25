@@ -12,6 +12,7 @@ import { useMovie } from '../hooks/useMovie';
 import { RootStackParamList } from '../navigation/types';
 import { safeZones, Theme } from '../theme';
 import { useTheme } from '../components/AccessibilityContext';
+import { detailsMetadata } from '../utils/detailsMetadata';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'Details'>;
 type DetailsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Details'>;
@@ -37,19 +38,10 @@ function MovieDetails({ movie }: { movie: CardData }) {
   // Memoize button style to prevent unnecessary re-renders
   const buttonStyle = useMemo(() => ({ paddingHorizontal: scaledPixels(30) }), []);
 
-  // Format duration from seconds to human-readable format
-  const formattedDuration = useMemo(() => {
-    if (!duration) return '';
-    const minutes = Math.floor(duration / 60);
-    const seconds = duration % 60;
-    return `${minutes}m ${seconds}s`;
-  }, [duration]);
-
-  // Format rating display
-  const ratingDisplay = useMemo(() => {
-    if (!rating) return '';
-    return `${rating.toFixed(1)} ⭐ (${ratingCount || 0} ratings)`;
-  }, [rating, ratingCount]);
+  const metadata = useMemo(
+    () => detailsMetadata({ releaseYear, contentRating, duration, rating, ratingCount }),
+    [releaseYear, contentRating, duration, rating, ratingCount],
+  );
 
   const navigate = useCallback(() => {
     navigation.navigate('Player', { id });
@@ -63,13 +55,15 @@ function MovieDetails({ movie }: { movie: CardData }) {
           <View style={detailsStyles.topContent}>
             <Text style={detailsStyles.title}>{title}</Text>
 
-            {/* Metadata row */}
-            <View style={detailsStyles.metadataRow}>
-              {releaseYear && <Text style={detailsStyles.metadataText}>{releaseYear}</Text>}
-              {contentRating && <Text style={detailsStyles.metadataText}>{contentRating}</Text>}
-              {formattedDuration && <Text style={detailsStyles.metadataText}>{formattedDuration}</Text>}
-              {ratingDisplay && <Text style={detailsStyles.metadataText}>{ratingDisplay}</Text>}
-            </View>
+            {metadata.length > 0 && (
+              <View style={detailsStyles.metadataRow}>
+                {metadata.map((text) => (
+                  <Text key={text} style={detailsStyles.metadataText}>
+                    {text}
+                  </Text>
+                ))}
+              </View>
+            )}
 
             {/* Genres */}
             {genres && genres.length > 0 && (
@@ -85,20 +79,6 @@ function MovieDetails({ movie }: { movie: CardData }) {
             <Text style={detailsStyles.description}>{description}</Text>
           </View>
           <View style={detailsStyles.bottomContent}>
-            <View style={detailsStyles.crewContainer}>
-              <View style={detailsStyles.crewMember}>
-                <Text style={detailsStyles.crewRole}>Director</Text>
-                <Text style={detailsStyles.crewName}>Chris Traganos</Text>
-              </View>
-              <View style={detailsStyles.crewMember}>
-                <Text style={detailsStyles.crewRole}>Executive Producer</Text>
-                <Text style={detailsStyles.crewName}>Gio Laquidara</Text>
-              </View>
-              <View style={detailsStyles.crewMember}>
-                <Text style={detailsStyles.crewRole}>Star</Text>
-                <Text style={detailsStyles.crewName}>Eric Fahsl</Text>
-              </View>
-            </View>
             <DefaultFocus>
               <FocusablePressable text={'Watch now'} onSelect={navigate} style={buttonStyle} />
             </DefaultFocus>
@@ -186,32 +166,6 @@ const createDetailsStyles = ({ colors, fontSize, backdropOpacity }: Theme) =>
       fontSize: fontSize(18),
       color: colors.text,
       fontWeight: '600',
-    },
-    crewContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: scaledPixels(40),
-      gap: scaledPixels(48),
-    },
-    crewMember: {
-      marginBottom: scaledPixels(16),
-    },
-    crewRole: {
-      fontSize: fontSize(20),
-      color: colors.textSecondary,
-      fontWeight: '600',
-      marginBottom: scaledPixels(4),
-      textShadowColor: 'rgba(0, 0, 0, 0.8)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 4,
-    },
-    crewName: {
-      fontSize: fontSize(28),
-      color: colors.text,
-      fontWeight: 'bold',
-      textShadowColor: 'rgba(0, 0, 0, 0.8)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 6,
     },
     watchButton: {
       backgroundColor: colors.cardElevated,
