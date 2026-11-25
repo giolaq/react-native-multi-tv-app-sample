@@ -65,6 +65,9 @@ export const highContrastColors: ThemeColors = {
   pressedOverlay: 'rgba(255, 255, 255, 0.2)',
   hoverOverlay: 'rgba(255, 255, 255, 0.15)',
 
+  // Seek bar track: 3:1 or more against the scrimmed video and against the white thumb
+  progressTrack: '#808080',
+
   // Scrim and overlays: darker, so text over artwork keeps its contrast
   scrimLight: 'rgba(0, 0, 0, 0.7)',
   scrimMedium: 'rgba(0, 0, 0, 0.85)',

@@ -8,6 +8,7 @@ import { SupportedKeys } from '../../../packages/shared-ui/src/app/remote-contro
 jest.mock('../../../packages/shared-ui/src/components/FocusablePressable', () => 'Button');
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
+  Dimensions: { get: () => ({ width: 1920, height: 1080 }) },
   StyleSheet: { create: (styles: object) => styles },
   View: 'View',
 }));
