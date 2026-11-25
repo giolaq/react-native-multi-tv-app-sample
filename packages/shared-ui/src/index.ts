@@ -11,6 +11,7 @@ export { default as LoadingIndicator } from './components/LoadingIndicator';
 export { MenuProvider, useMenuContext } from './components/MenuContext';
 export { AccessibilityProvider, useAccessibility, useTheme } from './components/AccessibilityContext';
 export { default as CustomDrawerContent } from './components/CustomDrawerContent';
+export { PlaybackPositionProvider } from './components/PlaybackPositionContext';
 
 // Screens
 export { default as HomeScreen } from './screens/HomeScreen';

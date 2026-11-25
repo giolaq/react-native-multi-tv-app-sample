@@ -5,12 +5,20 @@ import {
 } from '@amazon-devices/react-navigation__native';
 import {Platform} from 'react-native';
 import {GestureHandlerRootView} from '@amazon-devices/react-native-gesture-handler';
-import {AccessibilityProvider, MenuProvider} from '@multi-tv/shared-ui';
+import {
+  AccessibilityProvider,
+  MenuProvider,
+  PlaybackPositionProvider,
+} from '@multi-tv/shared-ui';
 import {AsyncStorage} from '@amazon-devices/react-native-kepler';
 import {
   createOverrideStore,
   overridesKey,
 } from '@multi-tv/shared-ui/src/theme/overrideStore';
+import {
+  createPositionStore,
+  positionsKey,
+} from '@multi-tv/shared-ui/src/data/positionStore';
 import VegaRootNavigator from './VegaRootNavigator';
 
 const accessibilityStore = createOverrideStore({
@@ -19,6 +27,14 @@ const accessibilityStore = createOverrideStore({
     value === null
       ? AsyncStorage.removeItem(overridesKey)
       : AsyncStorage.setItem(overridesKey, value),
+});
+
+const playbackPositionStore = createPositionStore({
+  read: () => AsyncStorage.getItem(positionsKey),
+  write: (value) =>
+    value === null
+      ? AsyncStorage.removeItem(positionsKey)
+      : AsyncStorage.setItem(positionsKey, value),
 });
 
 export interface VegaAppNavigatorProps {
@@ -55,11 +71,13 @@ export default function VegaAppNavigator({
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <AccessibilityProvider store={accessibilityStore}>
-        <NavigationContainer theme={DarkTheme}>
-          <MenuProvider>
-            <VegaRootNavigator />
-          </MenuProvider>
-        </NavigationContainer>
+        <PlaybackPositionProvider store={playbackPositionStore}>
+          <NavigationContainer theme={DarkTheme}>
+            <MenuProvider>
+              <VegaRootNavigator />
+            </MenuProvider>
+          </NavigationContainer>
+        </PlaybackPositionProvider>
       </AccessibilityProvider>
     </GestureHandlerRootView>
   );

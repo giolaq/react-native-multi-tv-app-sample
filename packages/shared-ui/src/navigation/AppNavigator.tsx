@@ -3,19 +3,28 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { Platform } from 'react-native';
 import { MenuProvider } from '../components/MenuContext';
 import { AccessibilityProvider } from '../components/AccessibilityContext';
+import { PlaybackPositionProvider } from '../components/PlaybackPositionContext';
 import { GoBackConfiguration } from '../app/remote-control/GoBackConfiguration';
 import RootNavigator from './RootNavigator';
 
 import type { OverrideStore } from '../theme/overrideStore';
+import type { PositionStore } from '../data/positionStore';
 import { logger } from '../utils/logger';
 
 export interface AppNavigatorProps {
   fontsLoaded?: boolean;
   accessibilityStore?: OverrideStore;
+  /** Where playback positions persist. Without one, they last for the session. */
+  playbackPositionStore?: PositionStore;
   onReady?: () => void;
 }
 
-export default function AppNavigator({ fontsLoaded = true, onReady, accessibilityStore }: AppNavigatorProps) {
+export default function AppNavigator({
+  fontsLoaded = true,
+  onReady,
+  accessibilityStore,
+  playbackPositionStore,
+}: AppNavigatorProps) {
   useEffect(() => {
     // Import remote control config for TV platforms
     if (Platform.isTV) {
@@ -40,12 +49,14 @@ export default function AppNavigator({ fontsLoaded = true, onReady, accessibilit
   return (
     <StrictMode>
       <AccessibilityProvider store={accessibilityStore}>
-        <NavigationContainer theme={DarkTheme}>
-          <MenuProvider>
-            <GoBackConfiguration />
-            <RootNavigator />
-          </MenuProvider>
-        </NavigationContainer>
+        <PlaybackPositionProvider store={playbackPositionStore}>
+          <NavigationContainer theme={DarkTheme}>
+            <MenuProvider>
+              <GoBackConfiguration />
+              <RootNavigator />
+            </MenuProvider>
+          </NavigationContainer>
+        </PlaybackPositionProvider>
       </AccessibilityProvider>
     </StrictMode>
   );

@@ -13,6 +13,7 @@ import VideoPlayer from '../components/player/VideoPlayer';
 import MovieLookupStatus from '../components/MovieLookupStatus';
 import type { CardData } from '../data/moviesData';
 import { useMovie } from '../hooks/useMovie';
+import { useSavePlaybackPosition } from '../components/PlaybackPositionContext';
 import { RootStackParamList } from '../navigation/types';
 
 const SHOW_NATIVE_CONTROLS = Platform.OS === 'ios';
@@ -21,16 +22,18 @@ type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
 type PlayerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Player'>;
 
 export default function PlayerScreen() {
-  const { id } = useRoute<PlayerScreenRouteProp>().params;
+  const { id, startTime = 0 } = useRoute<PlayerScreenRouteProp>().params;
   const lookup = useMovie(id);
   return lookup.status === 'found' ? (
-    <MoviePlayer movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
+    <MoviePlayer id={id} startTime={startTime} movie={lookup.movie.movie} headerImage={lookup.movie.headerImage} />
   ) : (
     <MovieLookupStatus lookup={lookup} />
   );
 }
 
-function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerImage'>) {
+type MoviePlayerProps = Pick<CardData, 'id' | 'movie' | 'headerImage'> & { startTime: number };
+
+function MoviePlayer({ id, startTime, movie, headerImage }: MoviePlayerProps) {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
   const isFocused = useIsFocused();
   const [failed, setFailed] = useState(false);
@@ -42,6 +45,9 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTimeRef = useRef<number>(0);
   const durationRef = useRef<number>(0);
+  // Where the next load starts: the requested time, or the last position before a Retry.
+  const startTimeRef = useRef<number>(startTime);
+  useSavePlaybackPosition(id, currentTimeRef, durationRef, isFocused);
 
   const showControls = useCallback(() => {
     setControlsVisible(true);
@@ -68,6 +74,16 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
     },
     [showControls],
   );
+
+  const handleLoad = useCallback((duration: number) => {
+    durationRef.current = duration;
+    const start = startTimeRef.current;
+    if (start > 0 && start < duration) {
+      videoRef.current?.seek(start);
+      currentTimeRef.current = start;
+      setCurrentTime(start);
+    }
+  }, []);
 
   const handleProgress = useCallback((time: number) => {
     currentTimeRef.current = time;
@@ -119,6 +135,7 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
 
   if (failed) {
     const retry = () => {
+      if (durationRef.current) startTimeRef.current = currentTimeRef.current;
       currentTimeRef.current = 0;
       durationRef.current = 0;
       setCurrentTime(0);
@@ -156,13 +173,14 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
           controls={SHOW_NATIVE_CONTROLS}
           onBuffer={setIsVideoBuffering}
           onProgress={handleProgress}
-          onLoad={(duration) => (durationRef.current = duration)}
+          onLoad={handleLoad}
           onError={() => {
             setControlsVisible(false);
             setIsVideoBuffering(false);
             setFailed(true);
           }}
           onEnd={() => {
+            currentTimeRef.current = durationRef.current;
             setPaused(true);
             navigation.goBack();
           }}
