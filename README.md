@@ -372,7 +372,7 @@ Shared component library used by both applications.
 **Exports:**
 
 - **Components**: `FocusablePressable`, `CustomDrawerContent`, `MenuContext`, `AccessibilityProvider`
-- **Screens**: `HomeScreen`, `DetailsScreen`, `PlayerScreen`, `ExploreScreen`, `TVScreen`
+- **Screens**: `HomeScreen`, `DetailsScreen`, `PlayerScreen`, `ExploreScreen`
 - **Navigation**: `DrawerNavigator`, `RootNavigator`, `AppNavigator`
 - **Hooks**: `scaledPixels`, `useMenuContext`, `useAccessibility`, `useTheme`
 - **Theme**: Centralized theming configuration, with a high-contrast preset (`createTheme`, `highContrastColors`, `contrastRatio`)

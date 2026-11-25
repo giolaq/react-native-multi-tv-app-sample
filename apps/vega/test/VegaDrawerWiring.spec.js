@@ -38,7 +38,6 @@ jest.mock(
     scaledPixels: (value) => value,
     HomeScreen: () => null,
     ExploreScreen: () => null,
-    TVScreen: () => null,
     SettingsScreen: () => null,
   }),
   {virtual: true},

@@ -3,7 +3,6 @@ import type {MovieRouteParams} from '@multi-tv/shared-ui';
 export type DrawerParamList = {
   Home: undefined;
   Explore: undefined;
-  TV: undefined;
   Settings: undefined;
 };
 
