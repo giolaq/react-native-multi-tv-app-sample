@@ -1,3 +1,7 @@
+// Each test reloads and transforms the real screens after jest.resetModules(). Without a warm
+// transform cache, and with other Vega suites running in parallel (as on CI), the first test can exceed 5 s.
+jest.setTimeout(30000);
+
 let React;
 let act;
 let create;
