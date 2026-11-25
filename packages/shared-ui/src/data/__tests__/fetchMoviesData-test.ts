@@ -1,7 +1,9 @@
 import { createCatalogStore } from '../catalogStore';
 import { CATALOG_TIMEOUT_MS, fetchMoviesData, type CatalogItem } from '../moviesData';
 
-jest.mock('../../utils/logger', () => ({ logger: { error: jest.fn() } }));
+jest.mock('../../utils/logger', () => ({
+  logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+}));
 
 const item = (id: string): CatalogItem => ({
   id,
@@ -15,8 +17,8 @@ const item = (id: string): CatalogItem => ({
   content_rating: '',
   release_year: 2020,
   duration_sec: 0,
-  images: { poster_16x9: '' },
-  sources: [],
+  images: { poster_16x9: `https://img.example/${id}.jpg` },
+  sources: [{ type: 'video/mp4', url: `https://v.example/${id}.mp4` }],
   description: '',
 });
 
