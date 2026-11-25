@@ -134,10 +134,26 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
     }
   }, [showControls]);
 
+  // Vega can deliver one Back press to both RemoteControlManager and BackHandler.
+  // The ref stays set after the timer fires, so the player exits at most once.
+  const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
   /**
-   * Navigate back with cleanup
+   * Navigate back with cleanup, once per exit
    */
   const navigateBack = useCallback(() => {
+    if (exitTimeoutRef.current) {
+      return;
+    }
     logger.debug('[PlayerScreen.kepler] - Navigating back');
 
     // Clear surface and caption handles
@@ -150,10 +166,11 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
 
     // Destroy video elements
     videoHandlerRef.current?.destroyVideoElements();
+    videoHandlerRef.current = null;
     videoRef.current = null;
 
     // Navigate back after short delay
-    setTimeout(() => {
+    exitTimeoutRef.current = setTimeout(() => {
       navigation.goBack();
     }, 300);
   }, [navigation]);
