@@ -31,6 +31,10 @@ jest.mock('../../../packages/shared-ui/src/components/player/VideoPlayer', () =>
   });
 });
 
+// The first render loads and transforms the real overlay, Animated and Text modules. Without a warm
+// transform cache (as on CI) that alone can pass the default 5 s timeout.
+jest.setTimeout(30000);
+
 // The jest-expo preset reports iOS, where the player shows native controls. Android TV draws the overlay,
 // and PlayerScreen reads the platform when it loads.
 let PlayerScreen: React.ComponentType;
