@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Animated, I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import TestRenderer from 'react-test-renderer';
 import PlayerScreen from '../../../packages/shared-ui/src/screens/PlayerScreen';
 import VideoOverlay from '../../../packages/shared-ui/src/components/player/VideoOverlay';
@@ -8,6 +8,9 @@ import { scaledPixels } from '../../../packages/shared-ui/src/hooks/useScale';
 import { colors } from '../../../packages/shared-ui/src/theme/colors';
 import { highContrastColors, type AccessibilityPreferences } from '../../../packages/shared-ui/src/theme/accessibility';
 import { blend, contrastRatio } from '../../../packages/shared-ui/src/theme/contrast';
+
+// React Native loads these on first access. Loading them here keeps that cold cost out of the first test's timeout.
+void [ActivityIndicator, Animated.View, I18nManager, Pressable, Text, View];
 
 let mockPreferences: AccessibilityPreferences;
 let mockVideoProps: { onError: () => void };
