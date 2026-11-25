@@ -68,17 +68,35 @@ export const transformCatalogItem = (item: CatalogItem): CardData => {
   };
 };
 
-// Fetch movies from catalog
+export const CATALOG_TIMEOUT_MS = 15_000;
+
+// Fetch movies from catalog. Rejects when the response and its body have not arrived within
+// CATALOG_TIMEOUT_MS, so a stalled network ends in a failure the UI can retry. The timer rejects
+// on its own because a fetch implementation can ignore the abort signal.
 export const fetchMoviesData = async (): Promise<CardData[]> => {
-  try {
-    const response = await fetch(CATALOG_URL);
+  const controller = typeof AbortController === 'function' ? new AbortController() : undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`Catalog request timed out after ${CATALOG_TIMEOUT_MS} ms`));
+      controller?.abort();
+    }, CATALOG_TIMEOUT_MS);
+  });
+  const request = (async () => {
+    const response = await fetch(CATALOG_URL, { signal: controller?.signal });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data: CatalogResponse = await response.json();
     return data.items.map(transformCatalogItem);
+  })();
+
+  try {
+    return await Promise.race([request, timeout]);
   } catch (error) {
     logger.error('Failed to fetch movies catalog:', error);
     throw error;
+  } finally {
+    clearTimeout(timer);
   }
 };
