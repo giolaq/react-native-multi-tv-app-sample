@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import {
   SpatialNavigationRoot,
   SpatialNavigationNode,
@@ -10,21 +10,15 @@ import { Direction } from '@bam.tech/lrud';
 import { scaledPixels } from '../hooks/useScale';
 import { colors, safeZones, Theme, AccessibilityPreferences } from '../theme';
 import FocusablePressable from '../components/FocusablePressable';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMenuContext } from '../components/MenuContext';
 import { useAccessibility } from '../components/AccessibilityContext';
 import { getOpenDrawerDirection } from '../utils/rtl';
-import { logger } from '../utils/logger';
 
 export default function SettingsScreen() {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const { isOpen: isMenuOpen, toggleMenu } = useMenuContext();
-  const [selectedQuality, setSelectedQuality] = useState('Auto');
-  const [notifications, setNotifications] = useState(true);
-  const [autoplay, setAutoplay] = useState(true);
-
-  const qualityOptions = ['Auto', '1080p', '720p', '480p'];
   const { preferences, overrides, setPreference, resetToSystem, theme } = useAccessibility();
   const themed = useMemo(() => createThemedStyles(theme), [theme]);
   const accessibilityOptions: { key: keyof AccessibilityPreferences; label: string }[] = [
@@ -92,42 +86,6 @@ export default function SettingsScreen() {
                 </SpatialNavigationNode>
               </View>
 
-              {/* Video Quality Section */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themed.sectionTitle]}>Video Quality</Text>
-                <SpatialNavigationNode orientation="horizontal">
-                  <View style={styles.optionsRow}>
-                    {qualityOptions.map((quality) => (
-                      <FocusablePressable
-                        key={quality}
-                        text={quality}
-                        onSelect={() => setSelectedQuality(quality)}
-                        style={[styles.optionButton, selectedQuality === quality && themed.selectedOption]}
-                      />
-                    ))}
-                  </View>
-                </SpatialNavigationNode>
-              </View>
-
-              {/* Playback Section */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themed.sectionTitle]}>Playback</Text>
-                <SpatialNavigationNode orientation="vertical">
-                  <View style={styles.optionsColumn}>
-                    <FocusablePressable
-                      text={`Autoplay: ${autoplay ? 'On' : 'Off'}`}
-                      onSelect={() => setAutoplay(!autoplay)}
-                      style={styles.toggleButton}
-                    />
-                    <FocusablePressable
-                      text={`Notifications: ${notifications ? 'On' : 'Off'}`}
-                      onSelect={() => setNotifications(!notifications)}
-                      style={styles.toggleButton}
-                    />
-                  </View>
-                </SpatialNavigationNode>
-              </View>
-
               {/* About Section */}
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, themed.sectionTitle]}>About</Text>
@@ -141,24 +99,6 @@ export default function SettingsScreen() {
                     <Text style={[styles.infoValue, themed.infoValue]}>2025.11.04</Text>
                   </View>
                 </View>
-              </View>
-
-              {/* Actions Section */}
-              <View style={styles.section}>
-                <SpatialNavigationNode orientation="vertical">
-                  <View style={styles.optionsColumn}>
-                    <FocusablePressable
-                      text="Clear Cache"
-                      onSelect={() => logger.debug('Clear cache')}
-                      style={styles.actionButton}
-                    />
-                    <FocusablePressable
-                      text="Sign Out"
-                      onSelect={() => logger.debug('Sign out')}
-                      style={styles.actionButton}
-                    />
-                  </View>
-                </SpatialNavigationNode>
               </View>
             </View>
           </SpatialNavigationScrollView>
@@ -227,25 +167,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: scaledPixels(20),
   },
-  optionsRow: {
-    flexDirection: 'row',
-    gap: scaledPixels(16),
-    flexWrap: 'wrap',
-  },
   optionsColumn: {
     gap: scaledPixels(16),
-  },
-  optionButton: {
-    marginEnd: scaledPixels(12),
-    marginBottom: scaledPixels(12),
   },
   toggleButton: {
     alignSelf: 'flex-start',
     minWidth: scaledPixels(300),
-  },
-  actionButton: {
-    alignSelf: 'flex-start',
-    minWidth: scaledPixels(250),
   },
   infoContainer: {
     backgroundColor: colors.card,
@@ -281,7 +208,6 @@ const createThemedStyles = ({ colors: palette, fontSize, preferences }: Theme) =
       marginTop: -scaledPixels(8),
       marginBottom: scaledPixels(20),
     },
-    selectedOption: { backgroundColor: palette.primary },
     infoContainer: {
       backgroundColor: palette.card,
       // A visible edge in high contrast: the card is barely lighter than the screen behind it.
