@@ -13,6 +13,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
+  Dimensions: { get: () => ({ width: 1920, height: 1080 }) },
   View: 'View',
   Text: 'Text',
   StyleSheet: { create: (styles: object) => styles },

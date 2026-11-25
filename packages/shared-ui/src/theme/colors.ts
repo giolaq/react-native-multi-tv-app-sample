@@ -39,6 +39,9 @@ export const colors = {
   pressedOverlay: 'rgba(255, 255, 255, 0.1)',
   hoverOverlay: 'rgba(255, 255, 255, 0.08)',
 
+  // Seek bar: the unplayed track behind the thumb
+  progressTrack: '#888888',
+
   // Scrim and overlays
   scrimLight: 'rgba(0, 0, 0, 0.4)',
   scrimMedium: 'rgba(0, 0, 0, 0.6)',

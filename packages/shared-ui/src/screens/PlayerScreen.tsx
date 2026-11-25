@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { Text, View, Platform, StyleSheet } from 'react-native';
 import { DefaultFocus, SpatialNavigationNode, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
@@ -14,6 +14,8 @@ import MovieLookupStatus from '../components/MovieLookupStatus';
 import type { CardData } from '../data/moviesData';
 import { useMovie } from '../hooks/useMovie';
 import { RootStackParamList } from '../navigation/types';
+import { useTheme } from '../components/AccessibilityContext';
+import type { Theme } from '../theme/accessibility';
 
 const SHOW_NATIVE_CONTROLS = Platform.OS === 'ios';
 
@@ -33,6 +35,8 @@ export default function PlayerScreen() {
 function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerImage'>) {
   const navigation = useNavigation<PlayerScreenNavigationProp>();
   const isFocused = useIsFocused();
+  const theme = useTheme();
+  const playerStyles = useMemo(() => createStyles(theme), [theme]);
   const [failed, setFailed] = useState(false);
   const [paused, setPaused] = useState<boolean>(false);
   const [controlsVisible, setControlsVisible] = useState<boolean>(false);
@@ -184,18 +188,13 @@ function MoviePlayer({ movie, headerImage }: Pick<CardData, 'movie' | 'headerIma
   );
 }
 
-const playerStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
-  errorActions: { gap: 20 },
-  errorText: { fontSize: 32, color: 'white' },
-  controlsContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'space-between',
-    zIndex: 1,
-  },
-});
+const createStyles = ({ colors, fontSize }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    errorPanel: { justifyContent: 'center', paddingHorizontal: '10%', gap: 20 },
+    errorActions: { gap: 20 },
+    errorText: { fontSize: fontSize(32), color: colors.text },
+  });
