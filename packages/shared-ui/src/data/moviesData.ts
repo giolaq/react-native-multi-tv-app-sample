@@ -124,7 +124,8 @@ export const transformCatalogItem = (item: unknown, index?: number): CardData | 
   };
 };
 
-// Throws when the response is not a catalog, so the catalog store reports a failure.
+// Takes the parsed JSON as unknown and throws when it is not a catalog, so the catalog store
+// reports a failure.
 const parseCatalogResponse = (data: unknown): CardData[] => {
   if (!isRecord(data) || !Array.isArray(data.items)) {
     throw new Error('Catalog response has no items array');
@@ -139,7 +140,7 @@ export const fetchMoviesData = async (): Promise<CardData[]> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data: unknown = await response.json();
+    const data: CatalogResponse = await response.json();
     return parseCatalogResponse(data);
   } catch (error) {
     logger.error('Failed to fetch movies catalog:', error);
