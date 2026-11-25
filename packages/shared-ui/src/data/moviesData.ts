@@ -79,6 +79,15 @@ const playableUrl = (sources: unknown): string | undefined => {
   return (playable.find((source) => source.type === 'video/mp4') ?? playable[0])?.url;
 };
 
+// Takes the parsed JSON as unknown and throws when it is not a catalog, so the catalog store
+// reports a failure.
+function parseCatalogResponse(data: unknown): CardData[] {
+  if (!isRecord(data) || !Array.isArray(data.items)) {
+    throw new Error('Catalog response has no items array');
+  }
+  return data.items.flatMap((item, index) => transformCatalogItem(item, index) ?? []);
+}
+
 /**
  * Maps one catalog item to a card. Returns null and logs a warning when the item lacks an id,
  * a title, a poster image or a playable source. Optional metadata of the wrong type is dropped.
@@ -122,15 +131,6 @@ export const transformCatalogItem = (item: unknown, index?: number): CardData | 
     contentRating: optionalString(item.content_rating),
     trending: optionalBoolean(item.trending),
   };
-};
-
-// Takes the parsed JSON as unknown and throws when it is not a catalog, so the catalog store
-// reports a failure.
-const parseCatalogResponse = (data: unknown): CardData[] => {
-  if (!isRecord(data) || !Array.isArray(data.items)) {
-    throw new Error('Catalog response has no items array');
-  }
-  return data.items.flatMap((item, index) => transformCatalogItem(item, index) ?? []);
 };
 
 // Fetch movies from catalog
