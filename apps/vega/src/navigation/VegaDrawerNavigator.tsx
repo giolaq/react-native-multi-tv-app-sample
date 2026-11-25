@@ -15,7 +15,6 @@ import {
   scaledPixels,
   HomeScreen,
   ExploreScreen,
-  TVScreen,
   SettingsScreen,
 } from '@multi-tv/shared-ui';
 import {DrawerParamList} from './types';
@@ -87,13 +86,6 @@ export default function VegaDrawerNavigator() {
           component={ExploreScreen}
           options={{
             drawerLabel: 'Explore',
-          }}
-        />
-        <Drawer.Screen
-          name="TV"
-          component={TVScreen}
-          options={{
-            drawerLabel: 'TV',
           }}
         />
         <Drawer.Screen

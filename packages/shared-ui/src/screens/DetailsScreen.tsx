@@ -213,24 +213,4 @@ const createDetailsStyles = ({ colors, fontSize, backdropOpacity }: Theme) =>
       textShadowOffset: { width: 0, height: 1 },
       textShadowRadius: 6,
     },
-    watchButton: {
-      backgroundColor: colors.cardElevated,
-      paddingVertical: scaledPixels(20),
-      paddingHorizontal: scaledPixels(40),
-      borderRadius: scaledPixels(8),
-      alignSelf: 'flex-start',
-    },
-    watchButtonFocused: {
-      backgroundColor: colors.focusBackground,
-    },
-    watchButtonText: {
-      color: colors.text,
-      fontSize: fontSize(24),
-      fontWeight: 'bold',
-    },
-    watchButtonTextFocused: {
-      color: colors.textOnPrimary,
-      fontSize: fontSize(24),
-      fontWeight: 'bold',
-    },
   });

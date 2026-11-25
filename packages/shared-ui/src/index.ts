@@ -17,7 +17,6 @@ export { default as HomeScreen } from './screens/HomeScreen';
 export { default as DetailsScreen } from './screens/DetailsScreen';
 export { default as PlayerScreen } from './screens/PlayerScreen';
 export { default as ExploreScreen } from './screens/ExploreScreen';
-export { default as TVScreen } from './screens/TVScreen';
 export { default as SettingsScreen } from './screens/SettingsScreen';
 
 // Utils

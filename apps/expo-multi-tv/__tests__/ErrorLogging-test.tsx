@@ -31,7 +31,7 @@ jest.mock(
   { virtual: true },
 );
 jest.mock('@amazon-devices/react-native-w3cmedia', () => ({}), { virtual: true });
-jest.mock('../../../packages/shared-ui/src/components/player/VideoOverlay.vega', () => () => null);
+jest.mock('../../../packages/shared-ui/src/components/player/VideoOverlay', () => () => null);
 jest.mock('../../../packages/shared-ui/src/components/player/VideoPlayer.vega', () => () => null);
 jest.mock('../../../packages/shared-ui/src/components/player/ExitButton', () => () => null);
 jest.mock('../../../packages/shared-ui/src/app/remote-control/RemoteControlManager', () => ({

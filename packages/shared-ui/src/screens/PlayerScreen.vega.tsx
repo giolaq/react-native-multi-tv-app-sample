@@ -8,7 +8,7 @@ import { IKeplerAppStateManager, useKeplerAppStateManager } from '@amazon-device
 import { VideoPlayer as W3CVideoPlayer } from '@amazon-devices/react-native-w3cmedia';
 import RemoteControlManager from '../app/remote-control/RemoteControlManager';
 import { SupportedKeys } from '../app/remote-control/SupportedKeys';
-import VideoOverlay from '../components/player/VideoOverlay.vega';
+import VideoOverlay from '../components/player/VideoOverlay';
 import ExitButton from '../components/player/ExitButton';
 import VideoPlayer from '../components/player/VideoPlayer.vega';
 import MovieLookupStatus from '../components/MovieLookupStatus';
