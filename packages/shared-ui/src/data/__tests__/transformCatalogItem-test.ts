@@ -1,4 +1,5 @@
 import { transformCatalogItem, type CatalogItem } from '../moviesData';
+import { logger } from '../../utils/logger';
 
 const catalogItem = (sources: CatalogItem['sources']): CatalogItem => ({
   id: 'abc',
@@ -43,7 +44,7 @@ it('prefers the mp4 source over earlier sources of other types', () => {
     ]),
   );
 
-  expect(card.movie).toBe('https://v.example/a.mp4');
+  expect(card?.movie).toBe('https://v.example/a.mp4');
 });
 
 it('falls back to the first source when none is mp4', () => {
@@ -54,9 +55,25 @@ it('falls back to the first source when none is mp4', () => {
     ]),
   );
 
-  expect(card.movie).toBe('https://v.example/a.m3u8');
+  expect(card?.movie).toBe('https://v.example/a.m3u8');
 });
 
-it('gives an empty movie URL when the item has no sources', () => {
-  expect(transformCatalogItem(catalogItem([])).movie).toBe('');
+it('skips an mp4 source without a URL in favor of a playable one', () => {
+  const card = transformCatalogItem(
+    catalogItem([
+      { type: 'video/mp4', url: '' },
+      { type: 'application/x-mpegURL', url: 'https://v.example/a.m3u8' },
+    ]),
+  );
+
+  expect(card?.movie).toBe('https://v.example/a.m3u8');
+});
+
+it('rejects an item with no sources and warns with its id', () => {
+  const warn = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+
+  expect(transformCatalogItem(catalogItem([]))).toBeNull();
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining('abc'));
+
+  warn.mockRestore();
 });
